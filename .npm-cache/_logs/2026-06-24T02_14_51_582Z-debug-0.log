@@ -1,0 +1,302 @@
+0 verbose cli D:\Apps\node.exe D:\Apps\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.12.1
+2 info using node@v24.15.0
+3 silly config load:file:D:\Apps\node_modules\npm\npmrc
+4 silly config load:file:D:\VS CODE PROJECTS\Mian Rent A Car\.npmrc
+5 silly config load:file:C:\Users\user\.npmrc
+6 silly config load:file:C:\Users\user\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install
+8 verbose argv "install" "--package-lock-only" "--cache" ".npm-cache"
+9 verbose logfile logs-max:10 dir:D:\VS CODE PROJECTS\Mian Rent A Car\.npm-cache\_logs\2026-06-24T02_14_51_582Z-
+10 verbose logfile D:\VS CODE PROJECTS\Mian Rent A Car\.npm-cache\_logs\2026-06-24T02_14_51_582Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly fetch manifest @neondatabase/serverless@^1.0.2
+15 silly packumentCache full:https://registry.npmjs.org/@neondatabase%2fserverless cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@neondatabase%2fserverless 877ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/@neondatabase%2fserverless set size:undefined disposed:false
+18 silly fetch manifest @vercel/blob@^2.0.0
+19 silly packumentCache full:https://registry.npmjs.org/@vercel%2fblob cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/@vercel%2fblob 205ms (cache miss)
+21 silly packumentCache full:https://registry.npmjs.org/@vercel%2fblob set size:undefined disposed:false
+22 silly placeDep ROOT @neondatabase/serverless@1.1.0 OK for: mian-rent-a-car@1.0.0 want: ^1.0.2
+23 silly placeDep ROOT @vercel/blob@2.4.1 OK for: mian-rent-a-car@1.0.0 want: ^2.0.0
+24 silly fetch manifest @vercel/oidc@^3.6.1
+25 silly packumentCache full:https://registry.npmjs.org/@vercel%2foidc cache-miss
+26 silly fetch manifest async-retry@^1.3.3
+27 silly packumentCache full:https://registry.npmjs.org/async-retry cache-miss
+28 silly fetch manifest is-buffer@^2.0.5
+29 silly packumentCache full:https://registry.npmjs.org/is-buffer cache-miss
+30 http fetch GET 200 https://registry.npmjs.org/is-buffer 531ms (cache miss)
+31 silly packumentCache full:https://registry.npmjs.org/is-buffer set size:undefined disposed:false
+32 silly fetch manifest is-node-process@^1.2.0
+33 silly packumentCache full:https://registry.npmjs.org/is-node-process cache-miss
+34 http fetch GET 200 https://registry.npmjs.org/async-retry 539ms (cache miss)
+35 silly packumentCache full:https://registry.npmjs.org/async-retry set size:undefined disposed:false
+36 silly fetch manifest throttleit@^2.1.0
+37 silly packumentCache full:https://registry.npmjs.org/throttleit cache-miss
+38 http fetch GET 200 https://registry.npmjs.org/@vercel%2foidc 887ms (cache miss)
+39 silly packumentCache full:https://registry.npmjs.org/@vercel%2foidc set size:undefined disposed:false
+40 silly fetch manifest undici@^6.23.0
+41 silly packumentCache full:https://registry.npmjs.org/undici cache-miss
+42 http fetch GET 200 https://registry.npmjs.org/is-node-process 387ms (cache miss)
+43 silly packumentCache full:https://registry.npmjs.org/is-node-process set size:undefined disposed:false
+44 http fetch GET 200 https://registry.npmjs.org/throttleit 384ms (cache miss)
+45 silly packumentCache full:https://registry.npmjs.org/throttleit set size:undefined disposed:false
+46 http fetch GET 200 https://registry.npmjs.org/undici 209ms (cache miss)
+47 silly packumentCache full:https://registry.npmjs.org/undici set size:undefined disposed:false
+48 silly placeDep ROOT @vercel/oidc@3.7.0 OK for: @vercel/blob@2.4.1 want: ^3.6.1
+49 silly placeDep ROOT async-retry@1.3.3 OK for: @vercel/blob@2.4.1 want: ^1.3.3
+50 silly placeDep ROOT is-buffer@2.0.5 OK for: @vercel/blob@2.4.1 want: ^2.0.5
+51 silly placeDep ROOT is-node-process@1.2.0 OK for: @vercel/blob@2.4.1 want: ^1.2.0
+52 silly placeDep ROOT throttleit@2.1.0 OK for: @vercel/blob@2.4.1 want: ^2.1.0
+53 silly placeDep ROOT undici@6.27.0 OK for: @vercel/blob@2.4.1 want: ^6.23.0
+54 silly fetch manifest jose@^5.9.6
+55 silly packumentCache full:https://registry.npmjs.org/jose cache-miss
+56 silly fetch manifest @vercel/cli-config@0.2.0
+57 silly packumentCache full:https://registry.npmjs.org/@vercel%2fcli-config cache-miss
+58 silly fetch manifest @vercel/cli-exec@1.0.0
+59 silly packumentCache full:https://registry.npmjs.org/@vercel%2fcli-exec cache-miss
+60 http fetch GET 200 https://registry.npmjs.org/jose 663ms (cache miss)
+61 silly packumentCache full:https://registry.npmjs.org/jose set size:undefined disposed:false
+62 silly fetch manifest retry@0.13.1
+63 silly packumentCache full:https://registry.npmjs.org/retry cache-miss
+64 http fetch GET 200 https://registry.npmjs.org/@vercel%2fcli-exec 1001ms (cache miss)
+65 silly packumentCache full:https://registry.npmjs.org/@vercel%2fcli-exec set size:undefined disposed:false
+66 http fetch GET 200 https://registry.npmjs.org/@vercel%2fcli-config 1008ms (cache miss)
+67 silly packumentCache full:https://registry.npmjs.org/@vercel%2fcli-config set size:undefined disposed:false
+68 http fetch GET 200 https://registry.npmjs.org/retry 330ms (cache miss)
+69 silly packumentCache full:https://registry.npmjs.org/retry set size:undefined disposed:false
+70 silly placeDep ROOT @vercel/cli-config@0.2.0 OK for: @vercel/oidc@3.7.0 want: 0.2.0
+71 silly placeDep ROOT @vercel/cli-exec@1.0.0 OK for: @vercel/oidc@3.7.0 want: 1.0.0
+72 silly placeDep ROOT jose@5.10.0 OK for: @vercel/oidc@3.7.0 want: ^5.9.6
+73 silly fetch manifest zod@4.1.11
+74 silly packumentCache full:https://registry.npmjs.org/zod cache-miss
+75 silly fetch manifest xdg-app-paths@5
+76 silly packumentCache full:https://registry.npmjs.org/xdg-app-paths cache-miss
+77 silly fetch manifest execa@5.1.1
+78 silly packumentCache full:https://registry.npmjs.org/execa cache-miss
+79 http fetch GET 200 https://registry.npmjs.org/execa 111ms (cache miss)
+80 silly packumentCache full:https://registry.npmjs.org/execa set size:undefined disposed:false
+81 http fetch GET 200 https://registry.npmjs.org/zod 275ms (cache miss)
+82 silly packumentCache full:https://registry.npmjs.org/zod set size:undefined disposed:false
+83 http fetch GET 200 https://registry.npmjs.org/xdg-app-paths 1430ms (cache miss)
+84 silly packumentCache full:https://registry.npmjs.org/xdg-app-paths set size:undefined disposed:false
+85 silly placeDep ROOT xdg-app-paths@5.5.1 OK for: @vercel/cli-config@0.2.0 want: 5
+86 silly placeDep ROOT zod@4.1.11 OK for: @vercel/cli-config@0.2.0 want: 4.1.11
+87 silly fetch manifest os-paths@^4.0.1
+88 silly packumentCache full:https://registry.npmjs.org/os-paths cache-miss
+89 silly fetch manifest xdg-portable@^7.2.0
+90 silly packumentCache full:https://registry.npmjs.org/xdg-portable cache-miss
+91 http fetch GET 200 https://registry.npmjs.org/xdg-portable 485ms (cache miss)
+92 silly packumentCache full:https://registry.npmjs.org/xdg-portable set size:undefined disposed:false
+93 http fetch GET 200 https://registry.npmjs.org/os-paths 493ms (cache miss)
+94 silly packumentCache full:https://registry.npmjs.org/os-paths set size:undefined disposed:false
+95 silly placeDep ROOT execa@5.1.1 OK for: @vercel/cli-exec@1.0.0 want: 5.1.1
+96 silly fetch manifest onetime@^5.1.2
+97 silly packumentCache full:https://registry.npmjs.org/onetime cache-miss
+98 silly fetch manifest is-stream@^2.0.0
+99 silly packumentCache full:https://registry.npmjs.org/is-stream cache-miss
+100 silly fetch manifest get-stream@^6.0.0
+101 silly packumentCache full:https://registry.npmjs.org/get-stream cache-miss
+102 http fetch GET 200 https://registry.npmjs.org/get-stream 465ms (cache miss)
+103 silly packumentCache full:https://registry.npmjs.org/get-stream set size:undefined disposed:false
+104 silly fetch manifest cross-spawn@^7.0.3
+105 silly packumentCache full:https://registry.npmjs.org/cross-spawn cache-miss
+106 http fetch GET 200 https://registry.npmjs.org/onetime 666ms (cache miss)
+107 silly packumentCache full:https://registry.npmjs.org/onetime set size:undefined disposed:false
+108 silly fetch manifest signal-exit@^3.0.3
+109 silly packumentCache full:https://registry.npmjs.org/signal-exit cache-miss
+110 http fetch GET 200 https://registry.npmjs.org/is-stream 693ms (cache miss)
+111 silly packumentCache full:https://registry.npmjs.org/is-stream set size:undefined disposed:false
+112 silly fetch manifest merge-stream@^2.0.0
+113 silly packumentCache full:https://registry.npmjs.org/merge-stream cache-miss
+114 http fetch GET 200 https://registry.npmjs.org/cross-spawn 464ms (cache miss)
+115 silly packumentCache full:https://registry.npmjs.org/cross-spawn set size:undefined disposed:false
+116 silly fetch manifest npm-run-path@^4.0.1
+117 silly packumentCache full:https://registry.npmjs.org/npm-run-path cache-miss
+118 http fetch GET 200 https://registry.npmjs.org/npm-run-path 84ms (cache miss)
+119 silly packumentCache full:https://registry.npmjs.org/npm-run-path set size:undefined disposed:false
+120 silly fetch manifest human-signals@^2.1.0
+121 silly packumentCache full:https://registry.npmjs.org/human-signals cache-miss
+122 http fetch GET 200 https://registry.npmjs.org/signal-exit 411ms (cache miss)
+123 silly packumentCache full:https://registry.npmjs.org/signal-exit set size:undefined disposed:false
+124 silly fetch manifest strip-final-newline@^2.0.0
+125 silly packumentCache full:https://registry.npmjs.org/strip-final-newline cache-miss
+126 http fetch GET 200 https://registry.npmjs.org/merge-stream 395ms (cache miss)
+127 silly packumentCache full:https://registry.npmjs.org/merge-stream set size:undefined disposed:false
+128 http fetch GET 200 https://registry.npmjs.org/human-signals 370ms (cache miss)
+129 silly packumentCache full:https://registry.npmjs.org/human-signals set size:undefined disposed:false
+130 http fetch GET 200 https://registry.npmjs.org/strip-final-newline 357ms (cache miss)
+131 silly packumentCache full:https://registry.npmjs.org/strip-final-newline set size:undefined disposed:false
+132 silly placeDep ROOT retry@0.13.1 OK for: async-retry@1.3.3 want: 0.13.1
+133 silly placeDep ROOT cross-spawn@7.0.6 OK for: execa@5.1.1 want: ^7.0.3
+134 silly placeDep ROOT get-stream@6.0.1 OK for: execa@5.1.1 want: ^6.0.0
+135 silly placeDep ROOT human-signals@2.1.0 OK for: execa@5.1.1 want: ^2.1.0
+136 silly placeDep ROOT is-stream@2.0.1 OK for: execa@5.1.1 want: ^2.0.0
+137 silly placeDep ROOT merge-stream@2.0.0 OK for: execa@5.1.1 want: ^2.0.0
+138 silly placeDep ROOT npm-run-path@4.0.1 OK for: execa@5.1.1 want: ^4.0.1
+139 silly placeDep ROOT onetime@5.1.2 OK for: execa@5.1.1 want: ^5.1.2
+140 silly placeDep ROOT signal-exit@3.0.7 OK for: execa@5.1.1 want: ^3.0.3
+141 silly placeDep ROOT strip-final-newline@2.0.0 OK for: execa@5.1.1 want: ^2.0.0
+142 silly fetch manifest which@^2.0.1
+143 silly packumentCache full:https://registry.npmjs.org/which cache-miss
+144 silly fetch manifest path-key@^3.1.0
+145 silly packumentCache full:https://registry.npmjs.org/path-key cache-miss
+146 silly fetch manifest shebang-command@^2.0.0
+147 silly packumentCache full:https://registry.npmjs.org/shebang-command cache-miss
+148 http fetch GET 200 https://registry.npmjs.org/shebang-command 384ms (cache miss)
+149 silly packumentCache full:https://registry.npmjs.org/shebang-command set size:undefined disposed:false
+150 silly fetch manifest path-key@^3.0.0
+151 silly packumentCache full:https://registry.npmjs.org/path-key cache-miss
+152 http fetch GET 200 https://registry.npmjs.org/path-key 404ms (cache miss)
+153 silly packumentCache full:https://registry.npmjs.org/path-key set size:undefined disposed:false
+154 silly fetch manifest mimic-fn@^2.1.0
+155 silly packumentCache full:https://registry.npmjs.org/mimic-fn cache-miss
+156 http fetch GET 200 https://registry.npmjs.org/which 412ms (cache miss)
+157 silly packumentCache full:https://registry.npmjs.org/which set size:undefined disposed:false
+158 http fetch GET 200 https://registry.npmjs.org/path-key 95ms (cache miss)
+159 silly packumentCache full:https://registry.npmjs.org/path-key set size:undefined disposed:false
+160 http fetch GET 200 https://registry.npmjs.org/mimic-fn 391ms (cache miss)
+161 silly packumentCache full:https://registry.npmjs.org/mimic-fn set size:undefined disposed:false
+162 silly placeDep ROOT path-key@3.1.1 OK for: cross-spawn@7.0.6 want: ^3.1.0
+163 silly placeDep ROOT shebang-command@2.0.0 OK for: cross-spawn@7.0.6 want: ^2.0.0
+164 silly placeDep ROOT which@2.0.2 OK for: cross-spawn@7.0.6 want: ^2.0.1
+165 silly fetch manifest shebang-regex@^3.0.0
+166 silly packumentCache full:https://registry.npmjs.org/shebang-regex cache-miss
+167 silly fetch manifest isexe@^2.0.0
+168 silly packumentCache full:https://registry.npmjs.org/isexe cache-miss
+169 http fetch GET 200 https://registry.npmjs.org/isexe 340ms (cache miss)
+170 silly packumentCache full:https://registry.npmjs.org/isexe set size:undefined disposed:false
+171 http fetch GET 200 https://registry.npmjs.org/shebang-regex 359ms (cache miss)
+172 silly packumentCache full:https://registry.npmjs.org/shebang-regex set size:undefined disposed:false
+173 silly placeDep ROOT mimic-fn@2.1.0 OK for: onetime@5.1.2 want: ^2.1.0
+174 silly placeDep ROOT shebang-regex@3.0.0 OK for: shebang-command@2.0.0 want: ^3.0.0
+175 silly placeDep ROOT isexe@2.0.0 OK for: which@2.0.2 want: ^2.0.0
+176 silly placeDep ROOT os-paths@4.4.0 OK for: xdg-app-paths@5.5.1 want: ^4.0.1
+177 silly placeDep ROOT xdg-portable@7.3.0 OK for: xdg-app-paths@5.5.1 want: ^7.2.0
+178 silly audit bulk request {
+178 silly audit   accepts: [ '1.3.8' ],
+178 silly audit   'array-flatten': [ '1.1.1' ],
+178 silly audit   bcryptjs: [ '2.4.3' ],
+178 silly audit   'body-parser': [ '1.20.5' ],
+178 silly audit   'buffer-equal-constant-time': [ '1.0.1' ],
+178 silly audit   bytes: [ '3.1.2' ],
+178 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+178 silly audit   'call-bound': [ '1.0.4' ],
+178 silly audit   'content-disposition': [ '0.5.4' ],
+178 silly audit   'content-type': [ '1.0.5' ],
+178 silly audit   cookie: [ '0.7.2' ],
+178 silly audit   'cookie-signature': [ '1.0.7' ],
+178 silly audit   debug: [ '2.6.9' ],
+178 silly audit   depd: [ '2.0.0' ],
+178 silly audit   destroy: [ '1.2.0' ],
+178 silly audit   dotenv: [ '16.6.1' ],
+178 silly audit   'dunder-proto': [ '1.0.1' ],
+178 silly audit   'ecdsa-sig-formatter': [ '1.0.11' ],
+178 silly audit   'ee-first': [ '1.1.1' ],
+178 silly audit   encodeurl: [ '2.0.0' ],
+178 silly audit   'es-define-property': [ '1.0.1' ],
+178 silly audit   'es-errors': [ '1.3.0' ],
+178 silly audit   'es-object-atoms': [ '1.1.2' ],
+178 silly audit   'escape-html': [ '1.0.3' ],
+178 silly audit   etag: [ '1.8.1' ],
+178 silly audit   express: [ '4.22.2' ],
+178 silly audit   finalhandler: [ '1.3.2' ],
+178 silly audit   forwarded: [ '0.2.0' ],
+178 silly audit   fresh: [ '0.5.2' ],
+178 silly audit   'function-bind': [ '1.1.2' ],
+178 silly audit   'get-intrinsic': [ '1.3.0' ],
+178 silly audit   'get-proto': [ '1.0.1' ],
+178 silly audit   gopd: [ '1.2.0' ],
+178 silly audit   'has-symbols': [ '1.1.0' ],
+178 silly audit   hasown: [ '2.0.4' ],
+178 silly audit   'http-errors': [ '2.0.1' ],
+178 silly audit   'iconv-lite': [ '0.4.24' ],
+178 silly audit   inherits: [ '2.0.4' ],
+178 silly audit   'ipaddr.js': [ '1.9.1' ],
+178 silly audit   jsonwebtoken: [ '9.0.3' ],
+178 silly audit   ms: [ '2.1.3', '2.0.0' ],
+178 silly audit   jwa: [ '2.0.1' ],
+178 silly audit   jws: [ '4.0.1' ],
+178 silly audit   'lodash.includes': [ '4.3.0' ],
+178 silly audit   'lodash.isboolean': [ '3.0.3' ],
+178 silly audit   'lodash.isinteger': [ '4.0.4' ],
+178 silly audit   'lodash.isnumber': [ '3.0.3' ],
+178 silly audit   'lodash.isplainobject': [ '4.0.6' ],
+178 silly audit   'lodash.isstring': [ '4.0.1' ],
+178 silly audit   'lodash.once': [ '4.1.1' ],
+178 silly audit   'math-intrinsics': [ '1.1.0' ],
+178 silly audit   'media-typer': [ '0.3.0' ],
+178 silly audit   'merge-descriptors': [ '1.0.3' ],
+178 silly audit   methods: [ '1.1.2' ],
+178 silly audit   mime: [ '1.6.0' ],
+178 silly audit   'mime-db': [ '1.52.0' ],
+178 silly audit   'mime-types': [ '2.1.35' ],
+178 silly audit   negotiator: [ '0.6.3' ],
+178 silly audit   'object-inspect': [ '1.13.4' ],
+178 silly audit   'on-finished': [ '2.4.1' ],
+178 silly audit   parseurl: [ '1.3.3' ],
+178 silly audit   'path-to-regexp': [ '0.1.13' ],
+178 silly audit   'proxy-addr': [ '2.0.7' ],
+178 silly audit   qs: [ '6.15.2' ],
+178 silly audit   'range-parser': [ '1.2.1' ],
+178 silly audit   'raw-body': [ '2.5.3' ],
+178 silly audit   'safe-buffer': [ '5.2.1' ],
+178 silly audit   'safer-buffer': [ '2.1.2' ],
+178 silly audit   semver: [ '7.8.5' ],
+178 silly audit   send: [ '0.19.2' ],
+178 silly audit   'serve-static': [ '1.16.3' ],
+178 silly audit   setprototypeof: [ '1.2.0' ],
+178 silly audit   'side-channel': [ '1.1.1' ],
+178 silly audit   'side-channel-list': [ '1.0.1' ],
+178 silly audit   'side-channel-map': [ '1.0.1' ],
+178 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+178 silly audit   statuses: [ '2.0.2' ],
+178 silly audit   toidentifier: [ '1.0.1' ],
+178 silly audit   'type-is': [ '1.6.18' ],
+178 silly audit   unpipe: [ '1.0.0' ],
+178 silly audit   'utils-merge': [ '1.0.1' ],
+178 silly audit   vary: [ '1.1.2' ],
+178 silly audit   '@neondatabase/serverless': [ '1.1.0' ],
+178 silly audit   '@vercel/blob': [ '2.4.1' ],
+178 silly audit   '@vercel/oidc': [ '3.7.0' ],
+178 silly audit   'async-retry': [ '1.3.3' ],
+178 silly audit   'is-buffer': [ '2.0.5' ],
+178 silly audit   'is-node-process': [ '1.2.0' ],
+178 silly audit   throttleit: [ '2.1.0' ],
+178 silly audit   undici: [ '6.27.0' ],
+178 silly audit   '@vercel/cli-config': [ '0.2.0' ],
+178 silly audit   '@vercel/cli-exec': [ '1.0.0' ],
+178 silly audit   jose: [ '5.10.0' ],
+178 silly audit   'xdg-app-paths': [ '5.5.1' ],
+178 silly audit   zod: [ '4.1.11' ],
+178 silly audit   execa: [ '5.1.1' ],
+178 silly audit   retry: [ '0.13.1' ],
+178 silly audit   'cross-spawn': [ '7.0.6' ],
+178 silly audit   'get-stream': [ '6.0.1' ],
+178 silly audit   'human-signals': [ '2.1.0' ],
+178 silly audit   'is-stream': [ '2.0.1' ],
+178 silly audit   'merge-stream': [ '2.0.0' ],
+178 silly audit   'npm-run-path': [ '4.0.1' ],
+178 silly audit   onetime: [ '5.1.2' ],
+178 silly audit   'signal-exit': [ '3.0.7' ],
+178 silly audit   'strip-final-newline': [ '2.0.0' ],
+178 silly audit   'path-key': [ '3.1.1' ],
+178 silly audit   'shebang-command': [ '2.0.0' ],
+178 silly audit   which: [ '2.0.2' ],
+178 silly audit   'mimic-fn': [ '2.1.0' ],
+178 silly audit   'shebang-regex': [ '3.0.0' ],
+178 silly audit   isexe: [ '2.0.0' ],
+178 silly audit   'os-paths': [ '4.4.0' ],
+178 silly audit   'xdg-portable': [ '7.3.0' ]
+178 silly audit }
+179 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 863ms
+180 silly audit report {}
+181 verbose cwd D:\VS CODE PROJECTS\Mian Rent A Car
+182 verbose os Windows_NT 10.0.26200
+183 verbose node v24.15.0
+184 verbose npm  v11.12.1
+185 verbose exit 0
+186 info ok
