@@ -11,12 +11,11 @@ Local mode saves data to the configured `DATA_EXPORT_PATH` folder and keeps brow
 1. Push this folder to a GitHub repository and import the repository in Vercel.
 2. In the Vercel Marketplace, add a **Neon Postgres** integration to the project. Copy its connection string into the `POSTGRES_URL` environment variable.
 3. Create a Vercel Blob store and add its `BLOB_READ_WRITE_TOKEN` to the project environment variables.
-4. Add a long random `JWT_SECRET` environment variable.
-5. Deploy. The first Vercel request creates the required PostgreSQL tables and the two initial accounts:
-   - `admin` / `admin`
-   - `ADMIN1` / `ADMIN1`
+4. Add a random, 32-character-or-longer `JWT_SECRET`.
+5. Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `SUPER_ADMIN_USERNAME`, and `SUPER_ADMIN_PASSWORD`. Both passwords must be unique and at least 12 characters. These accounts are created only when the database has no users; passwords are never committed to the repository.
+6. Deploy and confirm `GET /api/health` returns `{ "ok": true, "storage": "postgres" }`.
 
-On Vercel, application data is stored in Neon Postgres. New image uploads are moved to Vercel Blob and stored as URLs in the database. The Windows local export folders are used only when running locally.
+On Vercel, application data is stored in Neon Postgres. New image uploads are moved to Vercel Blob and stored as URLs in the database. Local development data uses `./.data`; no Windows-specific path is required.
 
 ## Future SQL reference
 
