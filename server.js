@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express=require('express'),jwt=require('jsonwebtoken'),path=require('path'),fs=require('fs'),bcrypt=require('bcryptjs');
 const app=express(),port=process.env.PORT||3000;
-const cloudMode=Boolean(process.env.POSTGRES_URL||process.env.DATABASE_URL);
+// Vercel must never attempt to use a Windows/local filesystem path.
+const cloudMode=Boolean(process.env.VERCEL||process.env.POSTGRES_URL||process.env.DATABASE_URL);
 const databaseUrl=process.env.POSTGRES_URL||process.env.DATABASE_URL;
 const dataRoot=process.env.DATA_EXPORT_PATH||'D:\\VS CODE PROJECTS\\Mian Rent A car Projects\\Mian Rent a Car Data';
 const stateFile=path.join(dataRoot,'system-state.json');
@@ -17,6 +18,7 @@ if(!cloudMode&&loadStateFromDisk())console.log(`Loaded saved data from ${stateFi
 
 async function ensureCloud(){
   if(!cloudMode)return;
+  if(!databaseUrl)throw new Error('Postgres is not configured. Add POSTGRES_URL in Vercel environment variables.');
   if(cloudReady)return cloudReady;
   cloudReady=(async()=>{
     const {neon}=require('@neondatabase/serverless');sql=neon(databaseUrl);
