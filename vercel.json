@@ -1,5 +1,21 @@
 {
+  "functions": {
+    "api/index.js": {
+      "includeFiles": [
+        "index.html",
+        "styles.css",
+        "without-driver.css",
+        "app.js",
+        "enhancements.js",
+        "4th form template.html",
+        "without driver template2.html",
+        "without-driver-template.jpeg",
+        "uploads/demo-profiles.png"
+      ]
+    }
+  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }
