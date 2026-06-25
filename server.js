@@ -8,8 +8,9 @@ const bcrypt=require('bcryptjs');
 
 const app=express();
 const port=process.env.PORT||3000;
-const cloudMode=Boolean(process.env.VERCEL||process.env.POSTGRES_URL||process.env.DATABASE_URL);
-const databaseUrl=process.env.POSTGRES_URL||process.env.DATABASE_URL;
+const databaseUrl=process.env.POSTGRES_URL||process.env.DATABASE_URL||process.env.POSTGRES_PRISMA_URL||process.env.POSTGRES_URL_NON_POOLING||process.env.NEON_DATABASE_URL;
+const blobToken=process.env.BLOB_READ_WRITE_TOKEN||process.env.VERCEL_BLOB_READ_WRITE_TOKEN;
+const cloudMode=Boolean(process.env.VERCEL||databaseUrl);
 const dataRoot=cloudMode?null:path.resolve(process.env.DATA_EXPORT_PATH||path.join(process.cwd(),'.data'));
 const stateFile=dataRoot?path.join(dataRoot,'system-state.json'):null;
 const secret=process.env.JWT_SECRET||(cloudMode?null:'local-development-secret-change-me');
@@ -157,10 +158,10 @@ async function putBlobDataUrl(dataUrl,key='file'){
   if(!parsed)throw new Error('A valid base64 data URL is required.');
   if(!['application/pdf'].includes(parsed.contentType)&&!parsed.contentType.startsWith('image/'))throw new Error('Only PDF and image uploads are supported.');
   if(!cloudMode)return dataUrl;
-  if(!process.env.BLOB_READ_WRITE_TOKEN)throw new Error('Vercel Blob is not configured. Add BLOB_READ_WRITE_TOKEN to Vercel environment variables.');
+  if(!blobToken)throw new Error('Vercel Blob is not configured. Add BLOB_READ_WRITE_TOKEN to Vercel environment variables.');
   const {put}=require('@vercel/blob');
   const filename=`mian-rent-a-car/${Date.now()}-${safeName(key)}.${extensionForContentType(parsed.contentType)}`;
-  return (await put(filename,parsed.buffer,{access:'public',contentType:parsed.contentType,cacheControlMaxAge:31536000,token:process.env.BLOB_READ_WRITE_TOKEN})).url;
+  return (await put(filename,parsed.buffer,{access:'public',contentType:parsed.contentType,cacheControlMaxAge:31536000,token:blobToken})).url;
 }
 async function moveImagesToBlob(value,key='file'){
   if(Array.isArray(value))return Promise.all(value.map((item,index)=>moveImagesToBlob(item,`${key}-${index+1}`)));
@@ -224,11 +225,11 @@ async function loginHandler(req,res){
     res.json({token:jwt.sign({username,role:account.role},secret,{expiresIn:'8h'}),role:account.role,username});
   }catch(error){
     console.error(error);
-    res.status(500).json({message:'Login service is unavailable'});
+    res.status(503).json({message:'Login setup is incomplete. Check Neon Postgres and admin environment variables in Vercel.'});
   }
 }
 
-app.get('/api/health',(req,res)=>res.status(200).json({ok:true,storage:cloudMode?'postgres':'local'}));
+app.get('/api/health',(req,res)=>res.status(200).json({ok:true,storage:cloudMode?'postgres':'local',databaseConfigured:!cloudMode||Boolean(databaseUrl),blobConfigured:!cloudMode||Boolean(blobToken),authConfigured:!cloudMode||configuredAccounts().length>0}));
 app.post('/api/login',loginHandler);
 app.post('/api/auth/login',loginHandler);
 app.put('/api/auth/password',auth,async(req,res)=>{
