@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Agreement - Mian Rent A Car</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            width: 850px;
+            background-color: #fff;
+            border: 3px solid #1a237e;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #1a237e;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .header-left {
+            width: 55%;
+        }
+
+        .company-name {
+            font-size: 32px;
+            font-weight: 900;
+            color: #1a237e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        .website-banner {
+            background-color: #1a237e;
+            color: white;
+            text-align: center;
+            padding: 3px;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            margin: 5px 0;
+            letter-spacing: 1px;
+        }
+
+        .address-box {
+            font-size: 11px;
+            color: #444;
+            line-height: 1.3;
+            font-weight: bold;
+        }
+
+        .header-right {
+            width: 40%;
+            text-align: right;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+
+        .services-list {
+            text-align: left;
+            margin-top: 5px;
+            font-size: 11px;
+            color: #333;
+            list-style: none;
+        }
+        .services-list li {
+            position: relative;
+            padding-left: 12px;
+        }
+        .services-list li::before {
+            content: "-";
+            position: absolute;
+            left: 0;
+        }
+
+        /* Title Area */
+        .title-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1a237e;
+            letter-spacing: 2px;
+            display: inline-block;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        .meta-box {
+            border: 1px solid #1a237e;
+            border-radius: 8px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .meta-box span {
+            color: #1a237e;
+            margin-right: 5px;
+        }
+        .rental-num {
+            color: red !important;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        /* Layout Content */
+        .content-grid {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .left-column {
+            width: 49%;
+        }
+
+        .right-column {
+            width: 49%;
+        }
+
+        /* Section Blocks */
+        .section-block {
+            border: 1px solid #555;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: transparent;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group label {
+            white-space: nowrap;
+            margin-right: 5px;
+        }
+
+        /* INPUT replacing form-control-line */
+        .field-input {
+            flex-grow: 1;
+            border: none;
+            border-bottom: 1px dotted #444;
+            outline: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            color: #222;
+            background: transparent;
+            padding: 0 2px 1px 2px;
+            height: 16px;
+            min-width: 0;
+        }
+        .field-input:focus {
+            border-bottom: 1.5px solid #1a237e;
+            background: rgba(26,35,126,0.03);
+        }
+
+        /* Date input inside meta-box */
+        .meta-date-input {
+            border: none;
+            outline: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1a237e;
+            background: transparent;
+            width: 120px;
+        }
+        .meta-date-input:focus { color: #1a237e; }
+
+        /* Rental # input */
+        .rental-input {
+            border: none;
+            outline: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: red;
+            background: transparent;
+            width: 55px;
+            margin-left: 5px;
+        }
+
+        /* NIC Box Styles */
+        .nic-container {
+            display: flex;
+            align-items: center;
+        }
+        .nic-boxes {
+            display: flex;
+            align-items: center;
+        }
+        .nic-box {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #444;
+            border-right: none;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            background: transparent;
+            padding: 0;
+            color: #222;
+        }
+        .nic-box:focus {
+            background: rgba(26,35,126,0.05);
+            border-color: #1a237e;
+        }
+        /* last box in each group gets right border */
+        .nic-box.last-in-group {
+            border-right: 1px solid #444;
+        }
+        .nic-dash {
+            margin: 0 3px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Right Column Table */
+        .car-details-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .car-details-table td {
+            border: 1px solid #555;
+            padding: 5px 8px;
+            height: 28px;
+        }
+
+        .car-details-table td:first-child {
+            width: 30%;
+            color: #333;
+        }
+
+        /* Table cell input */
+        .table-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 11px;
+            font-weight: bold;
+            color: #222;
+            background: transparent;
+            padding: 0;
+        }
+        .table-input:focus {
+            background: rgba(26,35,126,0.04);
+        }
+        .table-input[readonly] {
+            color: #1a237e;
+            cursor: default;
+        }
+        .table-input.balance-field[readonly] {
+            color: red;
+        }
+
+        .driver-options {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        /* Styled checkbox to look like original square-box */
+        .checkbox-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 35px;
+            height: 16px;
+            border: 1px solid #444;
+            background: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .checkbox-item input[type="checkbox"]:checked::after {
+            content: "✓";
+            position: absolute;
+            top: -1px;
+            left: 9px;
+            font-size: 13px;
+            color: #1a237e;
+            font-weight: bold;
+        }
+
+        .ampm-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        .ampm-box {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        /* Styled radio to look like original square-box */
+        .ampm-box input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 30px;
+            height: 16px;
+            border: 1px solid #444;
+            background: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .ampm-box input[type="radio"]:checked::after {
+            content: "✓";
+            position: absolute;
+            top: -1px;
+            left: 7px;
+            font-size: 13px;
+            color: #1a237e;
+            font-weight: bold;
+        }
+        .ampm-box span {
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Terms and Conditions (Urdu) */
+        .urdu-section {
+            direction: rtl;
+            font-family: 'Noto Nastaliq Urdu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: right;
+            margin-top: 5px;
+            font-size: 11px;
+            line-height: 1.8;
+            color: #222;
+        }
+
+        .urdu-header {
+            background-color: #1a237e;
+            color: white;
+            text-align: center;
+            padding: 2px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .urdu-list {
+            list-style: none;
+            padding-right: 0;
+        }
+
+        .urdu-list li {
+            position: relative;
+            padding-right: 15px;
+            margin-bottom: 2px;
+        }
+
+        .urdu-list li::before {
+            content: "•";
+            position: absolute;
+            right: 0;
+            color: #000;
+        }
+
+        /* Watermark Styles */
+        .watermark-text {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-family: 'Noto Nastaliq Urdu', serif;
+            font-size: 60px;
+            color: rgba(150, 150, 150, 0.15);
+            width: 80%;
+            text-align: center;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        /* Footer Section Styling — UNCHANGED */
+        .footer-graphics {
+            margin-top: 30px;
+            border-top: 1px dashed #999;
+            padding-top: 25px;
+            position: relative;
+            width: 100%;
+            height: 270px;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url('https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #3b4270;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        .bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .sig-group {
+            display: inline-block;
+            text-align: left;
+        }
+
+        .line {
+            width: 180px;
+            border-top: 1px solid #3b4270;
+            margin-bottom: 4px;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+        }
+
+        .fuel-gauge-container {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1.5px solid #3b4270;
+            border-radius: 6px;
+            width: 130px;
+            height: 65px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .gauge-arc {
+            width: 100px;
+            height: 35px;
+            border: 2px dashed #3b4270;
+            border-bottom: none;
+            border-top-left-radius: 50px;
+            border-top-right-radius: 50px;
+            position: relative;
+            margin-top: 5px;
+        }
+
+        .gauge-labels {
+            width: 110px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 0 5px;
+        }
+
+        .fuel-icon {
+            font-size: 10px;
+            position: absolute;
+            bottom: 12px;
+        }
+
+        .thumb-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .thumb-box {
+            width: 160px;
+            height: 60px;
+            border: 1px dashed #3b4270;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Print button */
+        .print-btn {
+            display: block;
+            margin: 18px auto 0;
+            padding: 8px 32px;
+            background: #1a237e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        .print-btn:hover { background: #283593; }
+        @media print { .print-btn { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="watermark-text">یہ گاڑی پرنٹڈ روڈ پر نہیں جا سکتی</div>
+
+        <!-- HEADER — unchanged layout -->
+        <div class="header">
+            <div class="header-left">
+                <div class="company-name">Mian Rent A Car</div>
+                <div class="tagline">Deals in Rent a Car, Pick &amp; Drop Services</div>
+                <div class="website-banner">www.carmian.com</div>
+                <div class="address-box">
+                    G5, Wapda Town Block G 5 Wapda<br>
+                    Town Phase 1 Lahore
+                </div>
+            </div>
+            <div class="header-right">
+                <div>📞 0304-4008105</div>
+                <div>📞 0301-4708912</div>
+                <div>📞 0303-4188831</div>
+                <ul class="services-list">
+                    <li>Our Services</li>
+                    <li>Pick &amp; Drop Service</li>
+                    <li>Airport &amp; Railway Station</li>
+                    <li>Wedding Party &amp; Picnic Party</li>
+                    <li>School Function</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TITLE — Date & Rental # as inputs -->
+        <div class="title-container">
+            <div class="main-title">RENTAL AGREEMENT</div>
+            <div class="meta-row">
+                <div class="meta-box" style="width: 160px;">
+                    <span>Date:</span>
+                    <input type="date" class="meta-date-input" />
+                </div>
+                <div class="meta-box" style="width: 140px;">
+                    <span>Rental #</span>
+                    <input type="text" class="rental-input" value="969" maxlength="6" />
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="left-column">
+
+                <!-- Customer Block -->
+                <div class="section-block">
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" class="field-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Father's Name</label>
+                        <input type="text" class="field-input" />
+                    </div>
+                    <div class="form-group nic-container">
+                        <label style="margin-right: 12px;">N.I.C No.</label>
+                        <div class="nic-boxes">
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box last-in-group" type="text" maxlength="1" />
+                            <span class="nic-dash">-</span>
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box last-in-group" type="text" maxlength="1" />
+                            <span class="nic-dash">-</span>
+                            <input class="nic-box last-in-group" type="text" maxlength="1" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Mobile</label>
+                        <input type="tel" class="field-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" class="field-input" />
+                    </div>
+                </div>
+
+                <!-- Guarantor Block -->
+                <div class="section-block">
+                    <div class="form-group">
+                        <label>Guarantor's Name</label>
+                        <input type="text" class="field-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Father's Name</label>
+                        <input type="text" class="field-input" />
+                    </div>
+                    <div class="form-group nic-container">
+                        <label style="margin-right: 12px;">N.I.C No.</label>
+                        <div class="nic-boxes">
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box last-in-group" type="text" maxlength="1" />
+                            <span class="nic-dash">-</span>
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box" type="text" maxlength="1" />
+                            <input class="nic-box last-in-group" type="text" maxlength="1" />
+                            <span class="nic-dash">-</span>
+                            <input class="nic-box last-in-group" type="text" maxlength="1" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Mobile</label>
+                        <input type="tel" class="field-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" class="field-input" />
+                    </div>
+                </div>
+
+                <!-- Urdu Terms — text only, no input needed -->
+                <div class="urdu-section">
+                    <div class="urdu-header">شرائط: (رنٹ پر گاڑی لینے سے پہلے شرائط لازمی پڑھ لیں۔ شکریہ)</div>
+                    <ul class="urdu-list">
+                        <li>گاڑی چوری، آگ یا مکمل تباہ ہونے کی صورت میں برائے معاہدہ نہ صرف کلائنٹ خود ذمہ دار ہو گا بلکہ گاڑی کی پوری قیمت ادا کرے گا۔</li>
+                        <li>کلائنٹ کا دعوی برائے نقصان خودرو، حادثہ یا موت ہرگز قابل قبول نہ ہوگا۔</li>
+                        <li>ٹریفک کے قوانین کی پابندی کرنی ہوگی۔ جرمانے کی صورت میں کلائنٹ خود ذمہ دار ہوگا۔</li>
+                        <li>کسی بھی پیچیدگی کی سپرداری وغیرہ تمام تر اخراجات کلائنٹ کی ذمہ داری ہوگی۔</li>
+                        <li>کمپنی کو اختیار ہے یہ ایگریمنٹ کسی بھی وقت کینسل کر سکتی ہے اور وہ اپنی گاڑی کہیں پر بھی سے قبضہ میں لے سکتی ہے۔</li>
+                        <li>ایکسسیڈنٹ کی صورت میں گاڑی ٹھیک ہونے تک کا کرایہ ادا کرنا ہوگا بمشروع گاڑی کی ٹوٹل میکنیکس کلاکھت کی ذمہ داری ہوگی۔</li>
+                        <li>گاڑی بغیر ڈرائیور کے لینے پر اچھی طرح چیک کریں اور واپسی پر گاڑی میں جو خرابی ہوگی اس کا ذمہ دار ہوگا۔</li>
+                        <li>گاڑی کو گودوی یا کسی ضمانت کے طور پر رکھوانے کی صورت میں سخت قانونی کاروائی عمل میں لائی جائے گی۔</li>
+                        <li>گاڑی ماہوار کرایہ پر حاصل کرنے کی صورت میں 7 دن بعد گاڑی برائے چیکنگ و معائنہ لانی ہوگی۔</li>
+                        <li>اگر کلائنٹ کرایہ وقت پر ادا نہ کرے گا تو ضامن کرایہ ادا کرنے کا پابند ہوگا۔</li>
+                        <li>ہر قسم کی سماعت کا اختیار صرف مقامی تھانہ یا عدالتوں میں ہوگا پنچائیت میں نہیں۔</li>
+                        <li>گاڑی کا کلوزنگ ٹائم شام 05:00 تا 07:00 ہے موسم گرما اور شام 04:00 تا 06:00 بجے تک موسم سرما ہے اس سے لیٹ ہونے کی صورت میں اگلے دن کا کرایہ چارج ہوگا یا پھر -/300 روپے فی گھنٹہ تاخیر کے چارج کیے جائیں گے۔</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="right-column">
+                <table class="car-details-table">
+                    <tr>
+                        <td>Car Make</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Model</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Colour</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Registration NO.</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Renting Station</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Chassis No.</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Engine Number</td>
+                        <td><input type="text" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>With Driver / Without Driver</td>
+                        <td>
+                            <div class="driver-options">
+                                <label class="checkbox-item">
+                                    <span>With Driver</span>
+                                    <input type="checkbox" name="driver_opt" />
+                                </label>
+                                <label class="checkbox-item">
+                                    <span>Without Driver</span>
+                                    <input type="checkbox" name="driver_opt" />
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Kilometer Out:</td>
+                        <td><input type="number" class="table-input" min="0" /></td>
+                    </tr>
+                    <tr>
+                        <td>Kilometer In:</td>
+                        <td><input type="number" class="table-input" min="0" /></td>
+                    </tr>
+                    <tr>
+                        <td>Date Out:</td>
+                        <td><input type="date" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Date In:</td>
+                        <td><input type="date" class="table-input" /></td>
+                    </tr>
+                    <tr>
+                        <td>Time Out:</td>
+                        <td>
+                            <div class="ampm-container">
+                                <div class="ampm-box">
+                                    <input type="radio" name="tout_ampm" value="Am" />
+                                    <span>Am</span>
+                                </div>
+                                <div class="ampm-box">
+                                    <input type="radio" name="tout_ampm" value="Pm" />
+                                    <span>Pm</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Time In:</td>
+                        <td>
+                            <div class="ampm-container">
+                                <div class="ampm-box">
+                                    <input type="radio" name="tin_ampm" value="Am" />
+                                    <span>Am</span>
+                                </div>
+                                <div class="ampm-box">
+                                    <input type="radio" name="tin_ampm" value="Pm" />
+                                    <span>Pm</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Per Day Rent Rs.</td>
+                        <td><input type="number" class="table-input" id="perDay" min="0" oninput="calcTotal()" /></td>
+                    </tr>
+                    <tr>
+                        <td>Total Days</td>
+                        <td><input type="number" class="table-input" id="totalDays" min="0" oninput="calcTotal()" /></td>
+                    </tr>
+                    <tr>
+                        <td>Total Rent Rs.</td>
+                        <td><input type="number" class="table-input" id="totalRent" readonly /></td>
+                    </tr>
+                    <tr>
+                        <td>Advance Rs.</td>
+                        <td><input type="number" class="table-input" id="advance" min="0" oninput="calcBalance()" /></td>
+                    </tr>
+                    <tr>
+                        <td>Balance Rs.</td>
+                        <td><input type="number" class="table-input balance-field" id="balance" readonly /></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- FOOTER — completely unchanged -->
+        <div class="footer-graphics">
+            <div class="top-row">
+                <div class="sig-group">
+                    <div class="line"></div>
+                    <div class="label">Signature Guarantor</div>
+                </div>
+                <div class="sig-group">
+                    <div class="line"></div>
+                    <div class="label">Signature Client</div>
+                </div>
+                <div class="sig-group">
+                    <div class="line"></div>
+                    <div class="label">Signature Controller</div>
+                </div>
+                <div class="sig-group">
+                    <div class="line"></div>
+                    <div class="label">Signature Client</div>
+                </div>
+            </div>
+
+            <div class="bottom-row">
+                <div class="sig-group">
+                    <div class="line"></div>
+                    <div class="label">Signature Controller</div>
+                </div>
+                <div class="fuel-gauge-container">
+                    <div class="gauge-arc"></div>
+                    <div class="fuel-icon">⛽</div>
+                    <div class="gauge-labels">
+                        <span>E</span>
+                        <span>F</span>
+                    </div>
+                </div>
+                <div class="thumb-group">
+                    <div class="thumb-box"></div>
+                    <div class="label">Guarantor Thumb Impression</div>
+                </div>
+                <div class="thumb-group">
+                    <div class="thumb-box"></div>
+                    <div class="label">Client Thumb Impression</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="print-btn" onclick="window.print()">🖨️ Print Form</button>
+    </div>
+
+    <script>
+        /* NIC boxes — auto advance & backspace */
+        document.querySelectorAll('.nic-box').forEach(function(box, i, all) {
+            box.addEventListener('input', function() {
+                if (box.value.length === 1 && i < all.length - 1) all[i + 1].focus();
+            });
+            box.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && box.value === '' && i > 0) all[i - 1].focus();
+            });
+        });
+
+        /* Only one checkbox ticked at a time for driver option */
+        document.querySelectorAll('input[name="driver_opt"]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                document.querySelectorAll('input[name="driver_opt"]').forEach(function(other) {
+                    if (other !== cb) other.checked = false;
+                });
+            });
+        });
+
+        /* Auto-calculate Total Rent */
+        function calcTotal() {
+            var perDay = parseFloat(document.getElementById('perDay').value) || 0;
+            var days   = parseFloat(document.getElementById('totalDays').value) || 0;
+            var total  = perDay * days;
+            document.getElementById('totalRent').value = total > 0 ? total : '';
+            calcBalance();
+        }
+
+        /* Auto-calculate Balance */
+        function calcBalance() {
+            var total   = parseFloat(document.getElementById('totalRent').value) || 0;
+            var advance = parseFloat(document.getElementById('advance').value) || 0;
+            var bal = total - advance;
+            document.getElementById('balance').value = total > 0 ? bal : '';
+        }
+    </script>
+
+</body>
+</html>

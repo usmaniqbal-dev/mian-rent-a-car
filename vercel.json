@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "api/index.js": {
-      "includeFiles": "{index.html,styles.css,without-driver.css,app.js,enhancements.js,4th form template.html,without driver template2.html,without-driver-template.jpeg,uploads/demo-profiles.png}"
+      "includeFiles": "public/**"
     }
   },
   "rewrites": [
