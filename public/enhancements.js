@@ -151,60 +151,117 @@ async function permanentTrashRecord(module,id){if(!confirm('Are you sure? This a
 function wireActiveSearches(){document.querySelectorAll('.directorySearch').forEach(i=>i.oninput=()=>{$('#rentalDirectory').innerHTML=rentalCards(activeRows(db.rentals).filter(x=>x.mode===i.dataset.mode&&JSON.stringify(x).toLowerCase().includes(i.value.toLowerCase())));bind();wireActiveSearches()});document.querySelectorAll('.masterSearch').forEach(i=>i.oninput=()=>{$('.masterRecords').innerHTML=masterCards(i.dataset.kind,activeRows(db[i.dataset.kind+'s']).filter(x=>JSON.stringify(x).toLowerCase().includes(i.value.toLowerCase())));bind();wireActiveSearches()})}
 function render(){let titles={dashboard:['OVERVIEW','Dashboard'],without:['RENTAL AGREEMENT','Without Driver'],with:['RENTAL AGREEMENT','With Driver'],search:['FIND RECORDS','Search Data'],add:['MASTER DATA','Add Data'],expenses:['BUSINESS COSTS','Expenses'],trash:['RECORD SAFETY','Trash'],admin:['SYSTEM CONFIGURATION','Admin Setup']};$('#pageKicker').textContent=titles[current][0];$('#pageTitle').textContent=titles[current][1];[...document.querySelectorAll('.nav-btn')].forEach(x=>x.classList.toggle('active',x.dataset.page===current));let f={dashboard,without:()=>rentalHub('without'),with:withDriver,search,add:addData,expenses,trash,admin}[current];$('#view').innerHTML=f();bind();wireActiveSearches();if(current==='trash')wireTrash()}
 
-function withoutDriverValue(items,index){return items && items[index] ? items[index].value || '' : ''}
-function withoutDriverNic(items,start){return Array.from(items || []).slice(start,start+13).map(x=>x.value||'').join('')}
-function saveWithoutDriverRental(){
+function withoutDriverValue(items,index){return items&&items[index]?items[index].value||'':''}
+function withoutDriverNic(items,start){return Array.from(items||[]).slice(start,start+13).map(x=>x.value||'').join('')}
+function setWithoutDriverNic(items,start,value){String(value||'').replace(/\D/g,'').slice(0,13).split('').forEach((n,i)=>{if(items[start+i])items[start+i].value=n})}
+function withoutDriverRadio(doc,name,value){let item=doc.querySelector(`input[name="${name}"][value="${value||''}"]`);if(item)item.checked=true}
+function currentWithoutDriverData(){
+  let frame=$('#withoutDriverFrame'),shell=$('.without-driver-shell');
+  if(!frame||!shell)throw new Error('Without Driver form is not open.');
+  let doc=frame.contentDocument;
+  if(!doc||!doc.querySelector('.field-input'))throw new Error('Please wait until the form finishes loading.');
+  let copy={};
+  try{copy=JSON.parse(shell.dataset.rental||'{}')}catch{}
+  let field=doc.querySelectorAll('.field-input'),nic=doc.querySelectorAll('.nic-box'),table=doc.querySelectorAll('.table-input');
+  let o={...copy,
+    seqNo:doc.querySelector('.rental-input')?.value||copy.seqNo||String(activeRows(db.rentals).filter(x=>x.mode==='without').length+1),
+    date:doc.querySelector('.meta-date-input')?.value||copy.date||new Date().toISOString().slice(0,10),
+    customerName:withoutDriverValue(field,0),
+    fatherName:withoutDriverValue(field,1),
+    identityCard:withoutDriverNic(nic,0),
+    phone:withoutDriverValue(field,2),
+    address:withoutDriverValue(field,3),
+    guarantorName:withoutDriverValue(field,4),
+    guarantorFatherName:withoutDriverValue(field,5),
+    guarantorNic:withoutDriverNic(nic,13),
+    guarantorPhone:withoutDriverValue(field,6),
+    guarantorAddress:withoutDriverValue(field,7),
+    carMake:withoutDriverValue(table,0),
+    model:withoutDriverValue(table,1),
+    colour:withoutDriverValue(table,2),
+    color:withoutDriverValue(table,2),
+    carNo:withoutDriverValue(table,3),
+    registrationNumber:withoutDriverValue(table,3),
+    rentingStation:withoutDriverValue(table,4),
+    chassisNo:withoutDriverValue(table,5),
+    engineNumber:withoutDriverValue(table,6),
+    kilometerOut:withoutDriverValue(table,7),
+    kilometerIn:withoutDriverValue(table,8),
+    pickupDate:withoutDriverValue(table,9),
+    dropupDate:withoutDriverValue(table,10),
+    timeOut:doc.querySelector('input[name="tout_ampm"]:checked')?.value||copy.timeOut||'',
+    timeIn:doc.querySelector('input[name="tin_ampm"]:checked')?.value||copy.timeIn||'',
+    perDayRent:withoutDriverValue(table,11),
+    totalDays:withoutDriverValue(table,12),
+    rent:withoutDriverValue(table,13),
+    advance:withoutDriverValue(table,14),
+    balance:withoutDriverValue(table,15),
+    mode:'without',
+    is_deleted:false
+  };
+  o.profit=(+o.rent||0)-(+o.fuelExpense||0)-(+o.toll||0)-(+o.driverCommission||0);
+  return o;
+}
+function upsertLocalWithoutDriver(record){
+  let list=db.rentals??=[],index=list.findIndex(x=>String(x.id)===String(record.id));
+  if(index>-1)list[index]=record;else list.push(record);
+  db.rentals=list;
+  localStorage.setItem('mianRac',JSON.stringify(db));
+}
+async function saveWithoutDriverRental(){
   try{
-    let frame=$('#withoutDriverFrame'),shell=$('.without-driver-shell');
-    if(!frame||!shell)return toast('Without Driver form is not open.');
-    let doc=frame.contentDocument;
-    if(!doc||!doc.querySelector('.field-input'))return toast('Please wait until the form finishes loading.');
-    let copy={};
-    try{copy=JSON.parse(shell.dataset.rental||'{}')}catch{}
-    let field=doc.querySelectorAll('.field-input'),nic=doc.querySelectorAll('.nic-box'),table=doc.querySelectorAll('.table-input');
-    let o={...copy,
-      seqNo:doc.querySelector('.rental-input')?.value||copy.seqNo||String(activeRows(db.rentals).filter(x=>x.mode==='without').length+1),
-      date:doc.querySelector('.meta-date-input')?.value||copy.date||new Date().toISOString().slice(0,10),
-      customerName:withoutDriverValue(field,0),
-      fatherName:withoutDriverValue(field,1),
-      identityCard:withoutDriverNic(nic,0),
-      phone:withoutDriverValue(field,2),
-      address:withoutDriverValue(field,3),
-      guarantorName:withoutDriverValue(field,4),
-      guarantorFatherName:withoutDriverValue(field,5),
-      guarantorNic:withoutDriverNic(nic,13),
-      guarantorPhone:withoutDriverValue(field,6),
-      guarantorAddress:withoutDriverValue(field,7),
-      carMake:withoutDriverValue(table,0),
-      model:withoutDriverValue(table,1),
-      colour:withoutDriverValue(table,2),
-      carNo:withoutDriverValue(table,3),
-      rentingStation:withoutDriverValue(table,4),
-      chassisNo:withoutDriverValue(table,5),
-      engineNumber:withoutDriverValue(table,6),
-      kilometerOut:withoutDriverValue(table,7),
-      kilometerIn:withoutDriverValue(table,8),
-      pickupDate:withoutDriverValue(table,9),
-      dropupDate:withoutDriverValue(table,10),
-      perDayRent:withoutDriverValue(table,11),
-      totalDays:withoutDriverValue(table,12),
-      rent:withoutDriverValue(table,13),
-      advance:withoutDriverValue(table,14),
-      balance:withoutDriverValue(table,15),
-      mode:'without',
-      is_deleted:false
-    };
-    o.profit=(+o.rent||0)-(+o.fuelExpense||0)-(+o.toll||0)-(+o.driverCommission||0);
-    if(!o.id)o.id=Date.now();
-    let list=db.rentals??=[],index=list.findIndex(x=>String(x.id)===String(o.id));
-    if(index>-1)list[index]=o;else list.push(o);
-    db.rentals=list;
-    save();
+    let record=currentWithoutDriverData(),isUpdate=Boolean(record.id),url=isUpdate?`/api/without-driver/${encodeURIComponent(record.id)}`:'/api/without-driver';
+    let r=await fetch(url,{method:isUpdate?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({record})}),out=await r.json();
+    if(!r.ok)throw new Error(out.message||'Save failed');
+    applyServerState(out);
+    upsertLocalWithoutDriver(out.record||record);
     current='without';
-    toast('Saved successfully');
+    toast(isUpdate?'Record updated successfully.':'Record saved successfully.');
     render();
   }catch(error){
-    console.error(error);
-    toast('Save failed. Please check the form and try again.');
+    toast(error.message||'Save failed. Please check the form and try again.');
   }
+}
+function prepareWithoutDriverFrame(){
+  let frame=$('#withoutDriverFrame'),shell=$('.without-driver-shell');
+  if(!frame||!shell)return;
+  let doc=frame.contentDocument,copy={};
+  try{copy=JSON.parse(shell.dataset.rental||'{}')}catch{}
+  let car=db.cars.find(x=>x.carNumber===copy.carNo||x.registrationNumber===copy.carNo)||{},field=doc.querySelectorAll('.field-input'),nic=doc.querySelectorAll('.nic-box'),table=doc.querySelectorAll('.table-input'),fill=(el,value)=>{if(el&&value!==undefined&&value!==null)el.value=value};
+  fill(doc.querySelector('.meta-date-input'),copy.date);
+  fill(doc.querySelector('.rental-input'),copy.seqNo);
+  [copy.customerName,copy.fatherName,copy.phone,copy.address,copy.guarantorName,copy.guarantorFatherName,copy.guarantorPhone,copy.guarantorAddress].forEach((v,i)=>fill(field[i],v));
+  setWithoutDriverNic(nic,0,copy.identityCard);
+  setWithoutDriverNic(nic,13,copy.guarantorNic);
+  [copy.carMake||car.carName,copy.model||car.model,copy.colour||copy.color||car.color,copy.carNo||copy.registrationNumber||car.registrationNumber,copy.rentingStation||car.rentingStation,copy.chassisNo||car.chassisNo,copy.engineNumber||car.engineNumber,copy.kilometerOut,copy.kilometerIn,copy.pickupDate,copy.dropupDate,copy.perDayRent,copy.totalDays,copy.rent,copy.advance,copy.balance].forEach((v,i)=>fill(table[i],v));
+  let driverOptions=doc.querySelectorAll('input[name="driver_opt"]');if(driverOptions[1])driverOptions[1].checked=true;
+  withoutDriverRadio(doc,'tout_ampm',copy.timeOut);
+  withoutDriverRadio(doc,'tin_ampm',copy.timeIn);
+  try{doc.defaultView.calcBalance()}catch{}
+  frame.style.height=(doc.body.scrollHeight+12)+'px';
+}
+async function openWithoutDriverRecord(id){
+  let record=(db.rentals||[]).find(x=>String(x.id)===String(id));
+  try{let r=await fetch(`/api/without-driver/${encodeURIComponent(id)}`),out=await r.json();if(r.ok&&out.record)record=out.record}catch{}
+  if(!record)return toast('Record not found');
+  current='without';
+  render();
+  setTimeout(()=>{let area=$('#rentalFormArea');if(area){area.innerHTML=`<div class="form-gap"></div>${rentalForm('without',record)}`;area.scrollIntoView({behavior:'smooth'});bind()}},0);
+}
+function viewRecord(kind,id){let x=getRecord(kind,id);if(kind==='rental'&&x?.mode==='without')return openWithoutDriverRecord(id);let title=kind==='rental'?'Rental record':label(kind);if(!x)return;let details=Object.entries(x).filter(([k,v])=>k!=='id'&&v&&typeof v!=='object'&&!String(v).startsWith('data:image')).map(([k,v])=>`<div class="detail"><small>${label(k)}</small>${v}</div>`).join('');let images=[x.customerImage,x.idCard,x.customerPhoto,...(x.images||[]),...(x.idCardImages||[])].filter(Boolean).filter(v=>/^data:image\/|^https:\/\//i.test(String(v))).map(v=>`<img src="${v}" alt="Saved image">`).join('');let target=current==='add'?'#addFormArea':'#rentalFormArea';let area=$(target)||$('#view');area.innerHTML=`<section class="form-shell record-view"><div class="form-heading"><div><h3>${title}</h3><p>Saved record details</p></div><button class="secondary closeView">Close</button></div><div class="record-details">${details}</div>${images?`<div class="image-gallery">${images}</div>`:''}</section>`;$('.closeView')?.addEventListener('click',()=>render())}
+function editRecord(kind,id){let x=getRecord(kind,id);if(kind==='rental'&&x?.mode==='without')return openWithoutDriverRecord(id);if(!x)return;if(kind==='rental'){current=x.mode;render();setTimeout(()=>{$('#rentalFormArea').innerHTML=rentalForm(x.mode,x);bind()},0)}else{current='add';render();setTimeout(()=>{$('#addFormArea').innerHTML=masterForm(kind,x);bind()},0)}}
+async function exportWithoutDriverPdf(){
+  try{
+    let data=currentWithoutDriverData();
+    if(window.jspdf){
+      let pdf=new jspdf.jsPDF(),y=20;
+      pdf.setFontSize(18);pdf.text('Mian Rent A Car',18,y);y+=9;
+      pdf.setFontSize(11);pdf.text('Without Driver Agreement',18,y);y+=10;
+      Object.entries(data).filter(([k,v])=>v&&typeof v!=='object'&&!['mode','is_deleted'].includes(k)).forEach(([k,v])=>{pdf.text(`${label(k)}: ${String(v).slice(0,90)}`,18,y);y+=8;if(y>275){pdf.addPage();y=20}});
+      let exportId=Date.now(),r=await fetch('/api/files/blob',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:exportId,recordType:'without_driver',recordId:data.id||'',customerName:data.customerName||'',filename:`without-driver-${data.customerName||exportId}`,contentType:'application/pdf',dataUrl:pdf.output('datauristring')})}),out=await r.json();
+      if(r.ok&&out.url){data.pdfUrl=out.url;if(data.id)await fetch(`/api/without-driver/${encodeURIComponent(data.id)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({record:data})});toast('PDF saved permanently')}
+      pdf.save('mian-without-driver-agreement.pdf');
+    }
+    let frame=$('#withoutDriverFrame');if(frame?.contentWindow){frame.contentWindow.focus();frame.contentWindow.print()}
+  }catch(error){toast(error.message||'PDF export failed')}
 }

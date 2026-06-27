@@ -161,6 +161,23 @@ async function createSchema() {
   await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
   await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
   await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS father_name TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS phone TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS address TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS guarantor_father_name TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS guarantor_phone TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS guarantor_address TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS car_make TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS model TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS color TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS registration_number TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS renting_station TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS chassis_no TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS engine_number TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS kilometer_out TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS kilometer_in TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS time_out TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS time_in TEXT`;
   await sql`ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
   await sql`ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
   await sql`ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
@@ -337,6 +354,7 @@ async function syncStateToTables(state) {
     await sql`INSERT INTO rentals (client_id,rental_type,seq_no,rental_date,car_no,driver_name,customer_name,phone,identity_card,address,pickup_place,pickup_date,dropup_place,dropup_date,referrer,rent,fuel_expense,toll,driver_commission,profit,customer_photo_url,cnic_front_url,cnic_back_url,driving_license_url,pdf_url,extra,updated_at) VALUES (${String(item.id)},${rentalType},${item.seqNo || null},${item.date || null},${item.carNo || null},${item.driver || null},${item.customerName || null},${item.phone || null},${item.identityCard || null},${item.address || null},${item.pickupPlace || null},${toDate(item.pickupDate)},${item.dropupPlace || null},${toDate(item.dropupDate)},${item.referrer || null},${toNumber(item.rent)},${toNumber(item.fuelExpense)},${toNumber(item.toll)},${toNumber(item.driverCommission)},${toNumber(item.profit)},${firstUrl(item.customerPhoto, item.customerImage)},${firstUrl(urls(item.idCardImages)[0], item.idCardPhoto, item.idCard)},${firstUrl(urls(item.idCardImages)[1])},${firstUrl(item.drivingLicense)},${item.pdfUrl || null},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET rental_type=EXCLUDED.rental_type,seq_no=EXCLUDED.seq_no,rental_date=EXCLUDED.rental_date,car_no=EXCLUDED.car_no,driver_name=EXCLUDED.driver_name,customer_name=EXCLUDED.customer_name,phone=EXCLUDED.phone,identity_card=EXCLUDED.identity_card,address=EXCLUDED.address,pickup_place=EXCLUDED.pickup_place,pickup_date=EXCLUDED.pickup_date,dropup_place=EXCLUDED.dropup_place,dropup_date=EXCLUDED.dropup_date,referrer=EXCLUDED.referrer,rent=EXCLUDED.rent,fuel_expense=EXCLUDED.fuel_expense,toll=EXCLUDED.toll,driver_commission=EXCLUDED.driver_commission,profit=EXCLUDED.profit,customer_photo_url=EXCLUDED.customer_photo_url,cnic_front_url=EXCLUDED.cnic_front_url,cnic_back_url=EXCLUDED.cnic_back_url,driving_license_url=EXCLUDED.driving_license_url,pdf_url=EXCLUDED.pdf_url,extra=EXCLUDED.extra,updated_at=NOW()`;
     if (rentalType === 'without_driver') {
       await sql`INSERT INTO without_driver_bookings (rental_client_id,seq_no,customer_name,identity_card,guarantor_name,guarantor_identity_card,car_no,pickup_date,dropup_date,rent,pdf_url,extra,updated_at) VALUES (${String(item.id)},${item.seqNo || null},${item.customerName || null},${item.identityCard || null},${item.guarantorName || null},${item.guarantorNic || null},${item.carNo || null},${toDate(item.pickupDate)},${toDate(item.dropupDate)},${toNumber(item.rent)},${item.pdfUrl || null},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (rental_client_id) DO UPDATE SET seq_no=EXCLUDED.seq_no,customer_name=EXCLUDED.customer_name,identity_card=EXCLUDED.identity_card,guarantor_name=EXCLUDED.guarantor_name,guarantor_identity_card=EXCLUDED.guarantor_identity_card,car_no=EXCLUDED.car_no,pickup_date=EXCLUDED.pickup_date,dropup_date=EXCLUDED.dropup_date,rent=EXCLUDED.rent,pdf_url=EXCLUDED.pdf_url,extra=EXCLUDED.extra,updated_at=NOW()`;
+      await sql`UPDATE without_driver_bookings SET father_name=${item.fatherName || null},phone=${item.phone || null},address=${item.address || null},guarantor_father_name=${item.guarantorFatherName || null},guarantor_phone=${item.guarantorPhone || null},guarantor_address=${item.guarantorAddress || null},car_make=${item.carMake || null},model=${item.model || null},color=${item.colour || item.color || null},registration_number=${item.registrationNumber || item.carNo || null},renting_station=${item.rentingStation || null},chassis_no=${item.chassisNo || null},engine_number=${item.engineNumber || null},kilometer_out=${item.kilometerOut || null},kilometer_in=${item.kilometerIn || null},time_out=${item.timeOut || null},time_in=${item.timeIn || null} WHERE rental_client_id=${String(item.id)}`;
     } else {
       await sql`INSERT INTO with_driver_bookings (rental_client_id,seq_no,customer_name,identity_card,driver_name,car_no,pickup_date,dropup_date,rent,driver_commission,pdf_url,extra,updated_at) VALUES (${String(item.id)},${item.seqNo || null},${item.customerName || null},${item.identityCard || null},${item.driver || null},${item.carNo || null},${toDate(item.pickupDate)},${toDate(item.dropupDate)},${toNumber(item.rent)},${toNumber(item.driverCommission)},${item.pdfUrl || null},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (rental_client_id) DO UPDATE SET seq_no=EXCLUDED.seq_no,customer_name=EXCLUDED.customer_name,identity_card=EXCLUDED.identity_card,driver_name=EXCLUDED.driver_name,car_no=EXCLUDED.car_no,pickup_date=EXCLUDED.pickup_date,dropup_date=EXCLUDED.dropup_date,rent=EXCLUDED.rent,driver_commission=EXCLUDED.driver_commission,pdf_url=EXCLUDED.pdf_url,extra=EXCLUDED.extra,updated_at=NOW()`;
     }
@@ -407,7 +425,7 @@ function requireSuperAdmin(req, res, next) {
 }
 async function loadCurrentState() {
   const current = await getState();
-  return { state: current.state || {}, revision: current.revision || 0 };
+  return { state: current.state && typeof current.state === 'object' && !Array.isArray(current.state) ? current.state : {}, revision: current.revision || 0 };
 }
 const trashModules = {
   without_driver: { stateKey: 'rentals', table: 'rentals', match: item => item.mode === 'without', label: 'Without Driver' },
@@ -429,6 +447,60 @@ function moduleItems(state, config) {
 }
 function findModuleItem(state, config, id) {
   return moduleItems(state, config).find(item => String(item.id) === String(id));
+}
+function ensureStateLists(state) {
+  state.cars = Array.isArray(state.cars) ? state.cars : [];
+  state.customers = Array.isArray(state.customers) ? state.customers : [];
+  state.drivers = Array.isArray(state.drivers) ? state.drivers : [];
+  state.rentals = Array.isArray(state.rentals) ? state.rentals : [];
+  state.expenses = Array.isArray(state.expenses) ? state.expenses : [];
+  state.fields = state.fields && typeof state.fields === 'object' ? state.fields : {};
+  return state;
+}
+function withoutDriverRows(state) {
+  return ensureStateLists(state).rentals.filter(item => item.mode === 'without' && !item.is_deleted);
+}
+function cleanWithoutDriverPayload(input = {}, existing = {}) {
+  const item = { ...existing, ...input };
+  item.id = String(item.id || existing.id || Date.now());
+  item.mode = 'without';
+  item.is_deleted = false;
+  item.seqNo = item.seqNo || '';
+  item.date = item.date || new Date().toISOString().slice(0, 10);
+  item.customerName = item.customerName || '';
+  item.fatherName = item.fatherName || '';
+  item.identityCard = item.identityCard || '';
+  item.phone = item.phone || '';
+  item.address = item.address || '';
+  item.guarantorName = item.guarantorName || '';
+  item.guarantorFatherName = item.guarantorFatherName || '';
+  item.guarantorNic = item.guarantorNic || '';
+  item.guarantorPhone = item.guarantorPhone || '';
+  item.guarantorAddress = item.guarantorAddress || '';
+  item.carMake = item.carMake || '';
+  item.model = item.model || '';
+  item.colour = item.colour || item.color || '';
+  item.color = item.colour;
+  item.carNo = item.carNo || item.registrationNumber || '';
+  item.registrationNumber = item.carNo;
+  item.rentingStation = item.rentingStation || '';
+  item.chassisNo = item.chassisNo || '';
+  item.engineNumber = item.engineNumber || '';
+  item.kilometerOut = item.kilometerOut || '';
+  item.kilometerIn = item.kilometerIn || '';
+  item.pickupDate = item.pickupDate || '';
+  item.dropupDate = item.dropupDate || '';
+  item.timeOut = item.timeOut || '';
+  item.timeIn = item.timeIn || '';
+  item.perDayRent = item.perDayRent || '';
+  item.totalDays = item.totalDays || '';
+  item.rent = item.rent || '';
+  item.advance = item.advance || '';
+  item.balance = item.balance || '';
+  item.profit = toNumber(item.rent) - toNumber(item.fuelExpense) - toNumber(item.toll) - toNumber(item.driverCommission);
+  item.updatedAt = new Date().toISOString();
+  if (!item.createdAt) item.createdAt = item.updatedAt;
+  return item;
 }
 function collectBlobUrls(value, output = new Set()) {
   if (!value) return output;
@@ -549,6 +621,55 @@ app.put('/api/state', auth, async (req, res) => {
     if (error.message === 'CONFLICT') return res.status(409).json({ message: 'Records changed elsewhere. Reload before saving again.', revision: error.revision });
     console.error(error);
     res.status(500).json({ message: 'Storage save failed' });
+  }
+});
+app.get('/api/without-driver', auth, async (req, res) => {
+  try {
+    const { state } = await loadCurrentState();
+    res.json({ ok: true, records: withoutDriverRows(state) });
+  } catch (error) {
+    console.error('Without Driver list failed:', error.message);
+    res.status(500).json({ message: 'Without Driver records are unavailable' });
+  }
+});
+app.get('/api/without-driver/:id', auth, async (req, res) => {
+  try {
+    const { state } = await loadCurrentState();
+    const record = withoutDriverRows(state).find(item => String(item.id) === String(req.params.id));
+    if (!record) return res.status(404).json({ message: 'Without Driver record not found' });
+    res.json({ ok: true, record });
+  } catch (error) {
+    console.error('Without Driver read failed:', error.message);
+    res.status(500).json({ message: 'Without Driver record is unavailable' });
+  }
+});
+app.post('/api/without-driver', auth, async (req, res) => {
+  try {
+    const { state, revision } = await loadCurrentState();
+    ensureStateLists(state);
+    const record = cleanWithoutDriverPayload(req.body?.record || req.body || {});
+    if (!record.seqNo) record.seqNo = String(withoutDriverRows(state).length + 1);
+    state.rentals.push(record);
+    const saved = await saveState(state, revision);
+    res.status(201).json({ ok: true, record, state: saved.state, revision: saved.revision });
+  } catch (error) {
+    console.error('Without Driver create failed:', error.message);
+    res.status(500).json({ message: 'Without Driver record could not be saved' });
+  }
+});
+app.put('/api/without-driver/:id', auth, async (req, res) => {
+  try {
+    const { state, revision } = await loadCurrentState();
+    ensureStateLists(state);
+    const index = state.rentals.findIndex(item => String(item.id) === String(req.params.id) && item.mode === 'without');
+    if (index < 0) return res.status(404).json({ message: 'Without Driver record not found' });
+    const record = cleanWithoutDriverPayload({ ...(req.body?.record || req.body || {}), id: req.params.id }, state.rentals[index]);
+    state.rentals[index] = record;
+    const saved = await saveState(state, revision);
+    res.json({ ok: true, record, state: saved.state, revision: saved.revision });
+  } catch (error) {
+    console.error('Without Driver update failed:', error.message);
+    res.status(500).json({ message: 'Without Driver record could not be updated' });
   }
 });
 app.get('/api/trash/:module', auth, requireSuperAdmin, async (req, res) => {

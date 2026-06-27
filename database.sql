@@ -103,12 +103,29 @@ CREATE TABLE IF NOT EXISTS without_driver_bookings (
   rental_client_id TEXT UNIQUE,
   seq_no TEXT,
   customer_name TEXT,
+  father_name TEXT,
   identity_card TEXT,
+  phone TEXT,
+  address TEXT,
   guarantor_name TEXT,
+  guarantor_father_name TEXT,
   guarantor_identity_card TEXT,
+  guarantor_phone TEXT,
+  guarantor_address TEXT,
+  car_make TEXT,
+  model TEXT,
+  color TEXT,
+  registration_number TEXT,
   car_no TEXT,
+  renting_station TEXT,
+  chassis_no TEXT,
+  engine_number TEXT,
+  kilometer_out TEXT,
+  kilometer_in TEXT,
   pickup_date TIMESTAMPTZ,
   dropup_date TIMESTAMPTZ,
+  time_out TEXT,
+  time_in TEXT,
   rent NUMERIC(12,2) DEFAULT 0,
   pdf_url TEXT,
   extra JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -227,6 +244,23 @@ ALTER TABLE rentals ADD COLUMN IF NOT EXISTS deleted_by TEXT;
 ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
 ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS deleted_by TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS father_name TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS guarantor_father_name TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS guarantor_phone TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS guarantor_address TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS car_make TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS model TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS color TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS registration_number TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS renting_station TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS chassis_no TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS engine_number TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS kilometer_out TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS kilometer_in TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS time_out TEXT;
+ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS time_in TEXT;
 ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
 ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS deleted_by TEXT;
