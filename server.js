@@ -4,9 +4,18 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
-const sharp = require('sharp');
 const helmet = require('helmet');
+
+let multer;
+let sharp;
+let uploadDependencyError = null;
+try {
+  multer = require('multer');
+  sharp = require('sharp');
+} catch (error) {
+  uploadDependencyError = error;
+  console.error('Upload dependencies are unavailable:', error.message);
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -21,7 +30,7 @@ const builtInAccounts = {
 };
 const staticRoots = [path.join(__dirname, 'public'), path.join(process.cwd(), 'public'), __dirname, process.cwd()];
 const staticRoot = staticRoots.find(root => fs.existsSync(path.join(root, 'index.html')));
-const upload = multer({
+const upload = multer ? multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024, files: 12 },
   fileFilter: (req, file, cb) => {
@@ -30,7 +39,7 @@ const upload = multer({
     }
     cb(null, true);
   }
-});
+}) : null;
 
 let savedState = null;
 let revision = 0;
@@ -181,6 +190,7 @@ function parseDataUrl(dataUrl) {
   return { contentType: match[1].toLowerCase(), buffer: Buffer.from(match[2], 'base64') };
 }
 async function optimizeImage(buffer) {
+  if (!sharp) throw new Error('Image processing dependency is unavailable. Redeploy after installing dependencies.');
   let quality = 82;
   let output = await sharp(buffer, { failOn: 'none' })
     .rotate()
@@ -361,7 +371,16 @@ app.put('/api/state', auth, async (req, res) => {
     res.status(500).json({ message: 'Storage save failed' });
   }
 });
-app.post('/api/files/images', auth, upload.array('images', 12), async (req, res) => {
+function requireUploadDependencies(req, res, next) {
+  if (!upload) {
+    return res.status(503).json({
+      message: 'Image upload is temporarily unavailable because deployment dependencies are incomplete.',
+      detail: uploadDependencyError?.message || 'multer/sharp not loaded'
+    });
+  }
+  next();
+}
+app.post('/api/files/images', auth, requireUploadDependencies, upload ? upload.array('images', 12) : (req, res, next) => next(), async (req, res) => {
   try {
     const files = req.files || [];
     if (!files.length) return res.status(400).json({ message: 'Select at least one image' });
