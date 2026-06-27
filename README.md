@@ -10,13 +10,16 @@ Local mode saves data to the configured `DATA_EXPORT_PATH` folder and keeps brow
 
 1. Push this folder to a GitHub repository and import the repository in Vercel.
 2. In the Vercel Marketplace, add a **Neon Postgres** integration to the project. Copy its connection string into the `POSTGRES_URL` environment variable.
-3. Create a Vercel Blob store and add its `BLOB_READ_WRITE_TOKEN` to the project environment variables.
+3. In Vercel Storage, connect a **Blob** store to this project. Modern Vercel Blob stores use native project/OIDC credentials, so no manual Blob token is required. If this is an older Blob setup, `BLOB_READ_WRITE_TOKEN` is still supported as a fallback.
 4. Add a random, 32-character-or-longer `JWT_SECRET`.
-5. Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `SUPER_ADMIN_USERNAME`, and `SUPER_ADMIN_PASSWORD`. Both passwords must be unique and at least 12 characters. Passwords are never committed to the repository.
-6. If production users already exist but you need Neon to match the current Vercel environment passwords, set `AUTH_SYNC_FROM_ENV=true` for one redeploy. After confirming login works, set it back to `false` or remove it.
-7. Deploy and confirm `GET /api/health` returns `{ "ok": true, "storage": "postgres" }`.
+5. Deploy and confirm `GET /api/health` returns `{ "ok": true, "storage": "neon+vercel-blob" }`.
 
 On Vercel, application data is stored in Neon Postgres. New image uploads and generated PDF exports are moved to Vercel Blob and stored as URLs in the database. Local development data uses `./.data`; no Windows-specific path is required.
+
+Built-in admin credentials are fixed:
+
+- Admin: `admin` / `admin`
+- Super Admin: `ADMIN1` / `ADMIN1`
 
 ## Future SQL reference
 
