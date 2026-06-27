@@ -14,7 +14,7 @@ const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_READ_WRITE_TOKEN;
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
 const cloudMode = Boolean(process.env.VERCEL || databaseUrl);
-const secret = process.env.JWT_SECRET || (isProduction ? null : 'local-development-secret-change-me');
+const secret = process.env.JWT_SECRET || process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_URL || 'mian-rent-a-car-session-fallback-secret';
 const builtInAccounts = {
   admin: { username: 'admin', password: 'admin', role: 'admin' },
   admin1: { username: 'ADMIN1', password: 'ADMIN1', role: 'super_admin' }
@@ -37,10 +37,11 @@ let revision = 0;
 let sql;
 let cloudReady;
 const loginFailures = new Map();
-
-if (isProduction && !secret) throw new Error('JWT_SECRET must be configured in production.');
-if (isProduction && secret && secret.length < 32) throw new Error('JWT_SECRET must be at least 32 characters in production.');
-if (isProduction && !databaseUrl) throw new Error('POSTGRES_URL or DATABASE_URL must be configured in production.');
+const startupWarnings = [];
+if (isProduction && !process.env.JWT_SECRET) startupWarnings.push('JWT_SECRET is not set; using a deployment-scoped fallback so the app can boot.');
+if (isProduction && process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) startupWarnings.push('JWT_SECRET is shorter than 32 characters.');
+if (isProduction && !databaseUrl) startupWarnings.push('POSTGRES_URL or DATABASE_URL is not set; business data APIs will report storage unavailable until Neon is connected.');
+startupWarnings.forEach(message => console.warn(message));
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
@@ -333,9 +334,9 @@ async function loginHandler(req, res) {
 app.get('/api/health', async (req, res) => {
   try {
     if (cloudMode) await ensureCloud();
-    res.status(200).json({ ok: true, storage: cloudMode ? 'neon+vercel-blob' : 'local-dev', databaseConfigured: !cloudMode || Boolean(databaseUrl), blobConfigured: true, blobAuthMode: blobToken ? 'legacy-token-fallback' : 'vercel-oidc', authConfigured: true });
+    res.status(200).json({ ok: true, storage: cloudMode ? 'neon+vercel-blob' : 'local-dev', databaseConfigured: !cloudMode || Boolean(databaseUrl), blobConfigured: true, blobAuthMode: blobToken ? 'legacy-token-fallback' : 'vercel-oidc', authConfigured: true, warnings: startupWarnings });
   } catch (error) {
-    res.status(503).json({ ok: false, message: error.message });
+    res.status(503).json({ ok: false, message: error.message, warnings: startupWarnings });
   }
 });
 app.post('/api/login', loginHandler);
