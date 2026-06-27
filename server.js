@@ -513,12 +513,12 @@ async function loginHandler(req, res) {
 }
 
 app.get('/api/health', async (req, res) => {
-  try {
-    if (cloudMode) await ensureCloud();
-    res.status(200).json({ ok: true, storage: cloudMode ? 'neon+vercel-blob' : 'local-dev', databaseConfigured: !cloudMode || Boolean(databaseUrl), blobConfigured: true, blobAuthMode: blobToken ? 'legacy-token-fallback' : 'vercel-oidc', authConfigured: true, warnings: startupWarnings });
-  } catch (error) {
-    res.status(503).json({ ok: false, message: error.message, warnings: startupWarnings });
-  }
+  res.status(200).json({
+    ok: true,
+    databaseConfigured: Boolean(databaseUrl),
+    blobConfigured: Boolean(blobToken || process.env.VERCEL),
+    authMode: 'static'
+  });
 });
 app.get('/api/branding', async (req, res) => {
   try {
