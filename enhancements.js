@@ -64,7 +64,7 @@ function wireAdmin(){
   document.querySelectorAll('.removeLogo').forEach(b=>b.onclick=()=>{if(!confirm('Delete this logo?'))return;delete branding()[b.dataset.logo];save();applyBranding();render();toast('Logo deleted')});
 }
 function applyBranding(){let logos=branding(),mian=logos.mian,nurax=logos.nurax,marks=document.querySelectorAll('.brand-mark,.mini-mark'),company=$('#companyLogo');marks.forEach(mark=>{mark.innerHTML=mian?`<img src="${mian}" alt="Mian Rent A Car logo">`:'MR'});if(nurax){company.src=nurax;company.classList.remove('hidden')}else{company.removeAttribute('src');company.classList.add('hidden')}}
-function setup(){applyBranding();$('#nav').innerHTML=navs.filter(n=>!['admin','trash'].includes(n[0])||user==='super_admin').map(n=>`<button class="nav-btn ${n[0]===current?'active':''}" data-page="${n[0]}"><i>${n[1]}</i><span>${n[2]}</span></button>`).join('');$('#nav').onclick=e=>{let b=e.target.closest('[data-page]');if(b){current=b.dataset.page;render()}};render()}
+function setup(){applyBranding();$('#nav').innerHTML=navs.filter(n=>!['admin','trash'].includes(n[0])||user==='super_admin').map(n=>`<button class="nav-btn ${n[0]===current?'active':''}" data-page="${n[0]}"><i>${n[1]}</i><span>${n[2]}</span></button>`).join('');$('#nav').onclick=e=>{let b=e.target.closest('[data-page]');if(b){current=b.dataset.page;$('.sidebar')?.classList.remove('open');render()}};render()}
 
 let dashboardFilter={period:'30',car:'',driver:''};
 function money(value){return `Rs. ${(Number(value)||0).toLocaleString()}`}
