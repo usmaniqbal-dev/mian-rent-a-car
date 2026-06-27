@@ -5,7 +5,6 @@
   "functions": {
     "api/index.js": {
       "includeFiles": "{server.js,public/**}",
-      "memory": 1024,
       "maxDuration": 30
     }
   },
