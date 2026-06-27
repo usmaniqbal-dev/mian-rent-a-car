@@ -142,6 +142,43 @@ async function createSchema() {
   await sql`CREATE TABLE IF NOT EXISTS with_driver_bookings (id BIGSERIAL PRIMARY KEY, rental_client_id TEXT UNIQUE, seq_no TEXT, customer_name TEXT, identity_card TEXT, driver_name TEXT, car_no TEXT, pickup_date TIMESTAMPTZ, dropup_date TIMESTAMPTZ, rent NUMERIC(12,2) DEFAULT 0, driver_commission NUMERIC(12,2) DEFAULT 0, pdf_url TEXT, extra JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
   await sql`CREATE TABLE IF NOT EXISTS exported_pdfs (id BIGSERIAL PRIMARY KEY, client_id TEXT UNIQUE, record_type TEXT NOT NULL, record_client_id TEXT, customer_name TEXT, pdf_url TEXT NOT NULL, extra JSONB NOT NULL DEFAULT '{}'::jsonb, created_by TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
   await sql`CREATE TABLE IF NOT EXISTS reports (id BIGSERIAL PRIMARY KEY, client_id TEXT UNIQUE, report_type TEXT NOT NULL, title TEXT, file_url TEXT, extra JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS expenses (id BIGSERIAL PRIMARY KEY, client_id TEXT UNIQUE, expense_type TEXT NOT NULL, expense_date DATE, expense_time TEXT, car_no TEXT, person TEXT, receiving_person TEXT, reason TEXT, amount NUMERIC(12,2) DEFAULT 0, notes TEXT, extra JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS app_objects (id BIGSERIAL PRIMARY KEY, object_key TEXT UNIQUE NOT NULL, label TEXT NOT NULL, extra JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS app_fields (id BIGSERIAL PRIMARY KEY, client_id TEXT UNIQUE NOT NULL, object_key TEXT NOT NULL, field_key TEXT NOT NULL, name TEXT NOT NULL, field_type TEXT NOT NULL, options TEXT, extra JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS admin_settings (setting_key TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`ALTER TABLE customers ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE drivers ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE drivers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE drivers ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE cars ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE cars ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE rentals ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE rentals ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE rentals ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE without_driver_bookings ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE with_driver_bookings ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE exported_pdfs ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE exported_pdfs ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE exported_pdfs ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE expenses ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE expenses ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE expenses ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE app_objects ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE app_objects ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE app_objects ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE app_fields ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE app_fields ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE app_fields ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
 }
 
 function dataRoot() {
@@ -182,6 +219,8 @@ function safeName(value) {
 function extensionForContentType(contentType) {
   if (contentType === 'application/pdf') return 'pdf';
   if (contentType === 'image/jpeg') return 'jpg';
+  if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return 'xlsx';
+  if (contentType === 'text/csv') return 'csv';
   return 'bin';
 }
 function parseDataUrl(dataUrl) {
@@ -230,14 +269,16 @@ async function putDataUrl(dataUrl, key = 'file') {
   const parsed = parseDataUrl(dataUrl);
   if (!parsed) throw new Error('A valid base64 data URL is required.');
   if (parsed.contentType === 'application/pdf') return putBlobBuffer(parsed.buffer, key, 'application/pdf');
+  if (parsed.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return putBlobBuffer(parsed.buffer, key, parsed.contentType);
+  if (parsed.contentType === 'text/csv') return putBlobBuffer(parsed.buffer, key, parsed.contentType);
   if (parsed.contentType.startsWith('image/')) return putImageBuffer(parsed.buffer, key);
-  throw new Error('Only PDF and image uploads are supported.');
+  throw new Error('Only PDF, spreadsheet, CSV, and image uploads are supported.');
 }
 async function moveFilesToBlob(value, key = 'file') {
   if (Array.isArray(value)) return Promise.all(value.map((item, index) => moveFilesToBlob(item, `${key}-${index + 1}`)));
   if (!value || (typeof value !== 'object' && typeof value !== 'string')) return value;
   if (typeof value === 'string') {
-    if (/^data:(image\/|application\/pdf)/i.test(value)) return putDataUrl(value, key);
+    if (/^data:(image\/|application\/pdf|application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet|text\/csv)/i.test(value)) return putDataUrl(value, key);
     return value;
   }
   const out = {};
@@ -259,6 +300,24 @@ function firstUrl(...values) {
 }
 function urls(value) {
   return Array.isArray(value) ? value.filter(v => typeof v === 'string') : (value ? [value] : []);
+}
+function deleteInfo(item = {}) {
+  return { isDeleted: Boolean(item.is_deleted), deletedAt: item.deleted_at || null, deletedBy: item.deleted_by || null };
+}
+async function syncDeletionFlags(state) {
+  if (!cloudMode) return;
+  for (const item of state.customers || []) await sql`UPDATE customers SET is_deleted=${deleteInfo(item).isDeleted},deleted_at=${deleteInfo(item).deletedAt},deleted_by=${deleteInfo(item).deletedBy} WHERE client_id=${String(item.id)}`;
+  for (const item of state.drivers || []) await sql`UPDATE drivers SET is_deleted=${deleteInfo(item).isDeleted},deleted_at=${deleteInfo(item).deletedAt},deleted_by=${deleteInfo(item).deletedBy} WHERE client_id=${String(item.id)}`;
+  for (const item of state.cars || []) await sql`UPDATE cars SET is_deleted=${deleteInfo(item).isDeleted},deleted_at=${deleteInfo(item).deletedAt},deleted_by=${deleteInfo(item).deletedBy} WHERE client_id=${String(item.id)}`;
+  for (const item of state.expenses || []) await sql`UPDATE expenses SET is_deleted=${deleteInfo(item).isDeleted},deleted_at=${deleteInfo(item).deletedAt},deleted_by=${deleteInfo(item).deletedBy} WHERE client_id=${String(item.id)}`;
+  for (const item of state.reports || []) await sql`UPDATE reports SET is_deleted=${deleteInfo(item).isDeleted},deleted_at=${deleteInfo(item).deletedAt},deleted_by=${deleteInfo(item).deletedBy} WHERE client_id=${String(item.id)}`;
+  for (const item of state.pdfExports || []) await sql`UPDATE exported_pdfs SET is_deleted=${deleteInfo(item).isDeleted},deleted_at=${deleteInfo(item).deletedAt},deleted_by=${deleteInfo(item).deletedBy} WHERE client_id=${String(item.id)}`;
+  for (const item of state.rentals || []) {
+    const info = deleteInfo(item);
+    await sql`UPDATE rentals SET is_deleted=${info.isDeleted},deleted_at=${info.deletedAt},deleted_by=${info.deletedBy} WHERE client_id=${String(item.id)}`;
+    if (item.mode === 'without') await sql`UPDATE without_driver_bookings SET is_deleted=${info.isDeleted},deleted_at=${info.deletedAt},deleted_by=${info.deletedBy} WHERE rental_client_id=${String(item.id)}`;
+    else await sql`UPDATE with_driver_bookings SET is_deleted=${info.isDeleted},deleted_at=${info.deletedAt},deleted_by=${info.deletedBy} WHERE rental_client_id=${String(item.id)}`;
+  }
 }
 async function syncStateToTables(state) {
   if (!cloudMode) return;
@@ -287,6 +346,29 @@ async function syncStateToTables(state) {
     await sql`INSERT INTO exported_pdfs (client_id,record_type,record_client_id,customer_name,pdf_url,extra,created_at) VALUES (${String(item.id)},${item.type || 'rental'},${item.recordId ? String(item.recordId) : null},${item.customerName || null},${item.url},${JSON.stringify(item)}::jsonb,${item.createdAt || new Date().toISOString()}) ON CONFLICT (client_id) DO UPDATE SET record_type=EXCLUDED.record_type,record_client_id=EXCLUDED.record_client_id,customer_name=EXCLUDED.customer_name,pdf_url=EXCLUDED.pdf_url,extra=EXCLUDED.extra`;
     await sql`INSERT INTO reports (client_id,report_type,title,file_url,extra,updated_at) VALUES (${String(item.id)},${item.type || 'rental'},${item.customerName || 'Exported PDF'},${item.url},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET report_type=EXCLUDED.report_type,title=EXCLUDED.title,file_url=EXCLUDED.file_url,extra=EXCLUDED.extra,updated_at=NOW()`;
   }
+  for (const item of state.reports || []) {
+    if (!item.url && !item.fileUrl) continue;
+    await sql`INSERT INTO reports (client_id,report_type,title,file_url,extra,updated_at) VALUES (${String(item.id)},${item.type || item.reportType || 'report'},${item.title || item.name || 'Report'},${item.url || item.fileUrl},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET report_type=EXCLUDED.report_type,title=EXCLUDED.title,file_url=EXCLUDED.file_url,extra=EXCLUDED.extra,updated_at=NOW()`;
+  }
+  for (const item of state.expenses || []) {
+    await sql`INSERT INTO expenses (client_id,expense_type,expense_date,expense_time,car_no,person,receiving_person,reason,amount,notes,extra,updated_at) VALUES (${String(item.id)},${item.type || 'other'},${item.date || null},${item.time || null},${item.carNo || null},${item.person || null},${item.receivingPerson || null},${item.reason || null},${toNumber(item.amount)},${item.notes || null},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET expense_type=EXCLUDED.expense_type,expense_date=EXCLUDED.expense_date,expense_time=EXCLUDED.expense_time,car_no=EXCLUDED.car_no,person=EXCLUDED.person,receiving_person=EXCLUDED.receiving_person,reason=EXCLUDED.reason,amount=EXCLUDED.amount,notes=EXCLUDED.notes,extra=EXCLUDED.extra,updated_at=NOW()`;
+  }
+  const objectList = state.objects || ['Rental', 'Car', 'Customer', 'Driver'].map(label => ({ key: label.toLowerCase(), label }));
+  for (const item of objectList) {
+    if (!item?.key || !item?.label) continue;
+    await sql`INSERT INTO app_objects (object_key,label,extra,updated_at) VALUES (${item.key},${item.label},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (object_key) DO UPDATE SET label=EXCLUDED.label,extra=EXCLUDED.extra,updated_at=NOW()`;
+  }
+  for (const [objectKey, fields] of Object.entries(state.fields || {})) {
+    for (const item of fields || []) {
+      const fieldKey = item.key || String(item.name || '').toLowerCase().replace(/\W+/g, '_');
+      if (!fieldKey || !item.name) continue;
+      const clientId = `${objectKey}:${fieldKey}`;
+      await sql`INSERT INTO app_fields (client_id,object_key,field_key,name,field_type,options,extra,updated_at) VALUES (${clientId},${objectKey},${fieldKey},${item.name},${item.type || 'text'},${item.options || null},${JSON.stringify(item)}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET object_key=EXCLUDED.object_key,field_key=EXCLUDED.field_key,name=EXCLUDED.name,field_type=EXCLUDED.field_type,options=EXCLUDED.options,extra=EXCLUDED.extra,updated_at=NOW()`;
+    }
+  }
+  await sql`INSERT INTO admin_settings (setting_key,payload,updated_at) VALUES ('branding',${JSON.stringify(state.branding || {})}::jsonb,NOW()) ON CONFLICT (setting_key) DO UPDATE SET payload=EXCLUDED.payload,updated_at=NOW()`;
+  await sql`INSERT INTO admin_settings (setting_key,payload,updated_at) VALUES ('dashboard',${JSON.stringify({ objects: state.objects || [], fields: state.fields || {}, expenses: state.expenses || [] })}::jsonb,NOW()) ON CONFLICT (setting_key) DO UPDATE SET payload=EXCLUDED.payload,updated_at=NOW()`;
+  await syncDeletionFlags(state);
 }
 async function saveState(state, expectedRevision = 0) {
   const payload = await moveFilesToBlob(state);
@@ -319,6 +401,95 @@ function auth(req, res, next) {
     res.status(401).json({ message: 'Please sign in again' });
   }
 }
+function requireSuperAdmin(req, res, next) {
+  if (req.user?.role !== 'super_admin') return res.status(403).json({ message: 'ADMIN1 access is required' });
+  next();
+}
+async function loadCurrentState() {
+  const current = await getState();
+  return { state: current.state || {}, revision: current.revision || 0 };
+}
+const trashModules = {
+  without_driver: { stateKey: 'rentals', table: 'rentals', match: item => item.mode === 'without', label: 'Without Driver' },
+  with_driver: { stateKey: 'rentals', table: 'rentals', match: item => item.mode !== 'without', label: 'With Driver' },
+  cars: { stateKey: 'cars', table: 'cars', label: 'Cars' },
+  customers: { stateKey: 'customers', table: 'customers', label: 'Customers' },
+  drivers: { stateKey: 'drivers', table: 'drivers', label: 'Drivers' },
+  expenses: { stateKey: 'expenses', table: 'expenses', label: 'Expenses' },
+  reports: { stateKey: 'reports', table: 'reports', label: 'Reports' }
+};
+function trashConfig(moduleName) {
+  const key = String(moduleName || '').trim().toLowerCase();
+  const aliases = { without: 'without_driver', with: 'with_driver', car: 'cars', customer: 'customers', driver: 'drivers', expense: 'expenses', report: 'reports' };
+  return trashModules[aliases[key] || key] ? { key: aliases[key] || key, ...trashModules[aliases[key] || key] } : null;
+}
+function moduleItems(state, config) {
+  const rows = Array.isArray(state[config.stateKey]) ? state[config.stateKey] : [];
+  return config.match ? rows.filter(config.match) : rows;
+}
+function findModuleItem(state, config, id) {
+  return moduleItems(state, config).find(item => String(item.id) === String(id));
+}
+function collectBlobUrls(value, output = new Set()) {
+  if (!value) return output;
+  if (typeof value === 'string') {
+    if (/^https:\/\/[^/]+\.blob\.vercel-storage\.com\//i.test(value)) output.add(value);
+    return output;
+  }
+  if (Array.isArray(value)) {
+    value.forEach(item => collectBlobUrls(item, output));
+    return output;
+  }
+  if (typeof value === 'object') Object.values(value).forEach(item => collectBlobUrls(item, output));
+  return output;
+}
+async function deleteBlobUrls(urlList) {
+  if (!cloudMode) return;
+  const unique = [...new Set(urlList)].filter(Boolean);
+  if (!unique.length) return;
+  const { del } = require('@vercel/blob');
+  for (const url of unique) {
+    try {
+      await del(url);
+    } catch (error) {
+      if (!blobToken) throw error;
+      await del(url, { token: blobToken });
+    }
+  }
+}
+async function updateTypedDeletion(config, id, deleted, user) {
+  if (!cloudMode) return;
+  const at = deleted ? new Date().toISOString() : null;
+  const by = deleted ? user.username : null;
+  if (config.key === 'customers') await sql`UPDATE customers SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE client_id=${String(id)}`;
+  if (config.key === 'drivers') await sql`UPDATE drivers SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE client_id=${String(id)}`;
+  if (config.key === 'cars') await sql`UPDATE cars SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE client_id=${String(id)}`;
+  if (config.key === 'expenses') await sql`UPDATE expenses SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE client_id=${String(id)}`;
+  if (config.key === 'reports') await sql`UPDATE reports SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE client_id=${String(id)}`;
+  if (config.key === 'without_driver' || config.key === 'with_driver') {
+    await sql`UPDATE rentals SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE client_id=${String(id)}`;
+    if (config.key === 'without_driver') await sql`UPDATE without_driver_bookings SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE rental_client_id=${String(id)}`;
+    else await sql`UPDATE with_driver_bookings SET is_deleted=${deleted},deleted_at=${at},deleted_by=${by},updated_at=NOW() WHERE rental_client_id=${String(id)}`;
+  }
+}
+async function deleteTypedRecord(config, id, relatedPdfIds = []) {
+  if (!cloudMode) return;
+  if (config.key === 'customers') await sql`DELETE FROM customers WHERE client_id=${String(id)}`;
+  if (config.key === 'drivers') await sql`DELETE FROM drivers WHERE client_id=${String(id)}`;
+  if (config.key === 'cars') await sql`DELETE FROM cars WHERE client_id=${String(id)}`;
+  if (config.key === 'expenses') await sql`DELETE FROM expenses WHERE client_id=${String(id)}`;
+  if (config.key === 'reports') await sql`DELETE FROM reports WHERE client_id=${String(id)}`;
+  if (config.key === 'without_driver' || config.key === 'with_driver') {
+    await sql`DELETE FROM rentals WHERE client_id=${String(id)}`;
+    await sql`DELETE FROM without_driver_bookings WHERE rental_client_id=${String(id)}`;
+    await sql`DELETE FROM with_driver_bookings WHERE rental_client_id=${String(id)}`;
+    await sql`DELETE FROM exported_pdfs WHERE record_client_id=${String(id)}`;
+  }
+  for (const pdfId of relatedPdfIds) {
+    await sql`DELETE FROM exported_pdfs WHERE client_id=${String(pdfId)}`;
+    await sql`DELETE FROM reports WHERE client_id=${String(pdfId)}`;
+  }
+}
 
 async function loginHandler(req, res) {
   const username = String(req.body?.username || '').trim();
@@ -349,6 +520,15 @@ app.get('/api/health', async (req, res) => {
     res.status(503).json({ ok: false, message: error.message, warnings: startupWarnings });
   }
 });
+app.get('/api/branding', async (req, res) => {
+  try {
+    if (cloudMode) await ensureCloud();
+    const { state } = await loadCurrentState();
+    res.json({ ok: true, branding: state.branding || {} });
+  } catch {
+    res.json({ ok: true, branding: {} });
+  }
+});
 app.post('/api/login', loginHandler);
 app.post('/api/auth/login', loginHandler);
 app.post('/api/logout', (req, res) => {
@@ -369,6 +549,89 @@ app.put('/api/state', auth, async (req, res) => {
     if (error.message === 'CONFLICT') return res.status(409).json({ message: 'Records changed elsewhere. Reload before saving again.', revision: error.revision });
     console.error(error);
     res.status(500).json({ message: 'Storage save failed' });
+  }
+});
+app.get('/api/trash/:module', auth, requireSuperAdmin, async (req, res) => {
+  try {
+    const config = trashConfig(req.params.module);
+    if (!config) return res.status(404).json({ message: 'Unknown trash module' });
+    const { state } = await loadCurrentState();
+    const rows = moduleItems(state, config).filter(item => item.is_deleted);
+    res.json({ ok: true, module: config.key, label: config.label, rows });
+  } catch (error) {
+    console.error('Trash list failed:', error.message);
+    res.status(500).json({ message: 'Trash is unavailable' });
+  }
+});
+app.post('/api/trash/:module/:id', auth, async (req, res) => {
+  try {
+    const config = trashConfig(req.params.module);
+    if (!config) return res.status(404).json({ message: 'Unknown trash module' });
+    const { state, revision } = await loadCurrentState();
+    const item = findModuleItem(state, config, req.params.id);
+    if (!item) return res.status(404).json({ message: 'Record not found' });
+    item.is_deleted = true;
+    item.deleted_at = new Date().toISOString();
+    item.deleted_by = req.user.username;
+    await updateTypedDeletion(config, item.id, true, req.user);
+    const saved = await saveState(state, revision);
+    res.json({ ok: true, state: saved.state, revision: saved.revision, record: item });
+  } catch (error) {
+    console.error('Soft delete failed:', error.message);
+    res.status(500).json({ message: 'Could not move record to Trash' });
+  }
+});
+app.post('/api/trash/:module/:id/restore', auth, requireSuperAdmin, async (req, res) => {
+  try {
+    const config = trashConfig(req.params.module);
+    if (!config) return res.status(404).json({ message: 'Unknown trash module' });
+    const { state, revision } = await loadCurrentState();
+    const item = findModuleItem(state, config, req.params.id);
+    if (!item) return res.status(404).json({ message: 'Record not found' });
+    item.is_deleted = false;
+    delete item.deleted_at;
+    delete item.deleted_by;
+    await updateTypedDeletion(config, item.id, false, req.user);
+    const saved = await saveState(state, revision);
+    res.json({ ok: true, state: saved.state, revision: saved.revision, record: item });
+  } catch (error) {
+    console.error('Trash restore failed:', error.message);
+    res.status(500).json({ message: 'Could not restore record' });
+  }
+});
+app.delete('/api/trash/:module/:id/permanent', auth, requireSuperAdmin, async (req, res) => {
+  try {
+    const config = trashConfig(req.params.module);
+    if (!config) return res.status(404).json({ message: 'Unknown trash module' });
+    const { state, revision } = await loadCurrentState();
+    const list = Array.isArray(state[config.stateKey]) ? state[config.stateKey] : [];
+    const item = list.find(row => String(row.id) === String(req.params.id) && (!config.match || config.match(row)));
+    if (!item) return res.status(404).json({ message: 'Record not found' });
+    const files = collectBlobUrls(item);
+    const relatedPdfIds = [];
+    if (config.key === 'without_driver' || config.key === 'with_driver') {
+      for (const pdf of state.pdfExports || []) {
+        if (String(pdf.recordId || '') === String(item.id)) {
+          relatedPdfIds.push(pdf.id);
+          collectBlobUrls(pdf, files);
+          pdf.is_deleted = true;
+        }
+      }
+      for (const report of state.reports || []) {
+        if (relatedPdfIds.some(id => String(id) === String(report.id))) collectBlobUrls(report, files);
+      }
+      state.pdfExports = (state.pdfExports || []).filter(pdf => String(pdf.recordId || '') !== String(item.id));
+      state.reports = (state.reports || []).filter(report => !relatedPdfIds.some(id => String(id) === String(report.id)));
+    }
+    if (config.key === 'reports') collectBlobUrls(item, files);
+    state[config.stateKey] = list.filter(row => !(String(row.id) === String(item.id) && (!config.match || config.match(row))));
+    await deleteBlobUrls([...files]);
+    await deleteTypedRecord(config, item.id, relatedPdfIds);
+    const saved = await saveState(state, revision);
+    res.json({ ok: true, deletedFiles: files.size, state: saved.state, revision: saved.revision });
+  } catch (error) {
+    console.error('Permanent delete failed:', error.message);
+    res.status(500).json({ message: 'Permanent delete failed' });
   }
 });
 function requireUploadDependencies(req, res, next) {
@@ -400,6 +663,9 @@ app.post('/api/files/blob', auth, async (req, res) => {
       const id = String(req.body?.id || Date.now());
       await sql`INSERT INTO exported_pdfs (client_id,record_type,record_client_id,customer_name,pdf_url,extra,created_by) VALUES (${id},${req.body?.recordType || 'rental'},${req.body?.recordId ? String(req.body.recordId) : null},${req.body?.customerName || null},${url},${JSON.stringify(req.body || {})}::jsonb,${req.user.username}) ON CONFLICT (client_id) DO UPDATE SET pdf_url=EXCLUDED.pdf_url,extra=EXCLUDED.extra`;
       await sql`INSERT INTO reports (client_id,report_type,title,file_url,extra,updated_at) VALUES (${id},${req.body?.recordType || 'rental'},${req.body?.customerName || req.body?.filename || 'Exported PDF'},${url},${JSON.stringify(req.body || {})}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET report_type=EXCLUDED.report_type,title=EXCLUDED.title,file_url=EXCLUDED.file_url,extra=EXCLUDED.extra,updated_at=NOW()`;
+    } else if (cloudMode && ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'].includes(contentType)) {
+      const id = String(req.body?.id || Date.now());
+      await sql`INSERT INTO reports (client_id,report_type,title,file_url,extra,updated_at) VALUES (${id},${req.body?.recordType || 'report'},${req.body?.title || req.body?.filename || 'Exported report'},${url},${JSON.stringify(req.body || {})}::jsonb,NOW()) ON CONFLICT (client_id) DO UPDATE SET report_type=EXCLUDED.report_type,title=EXCLUDED.title,file_url=EXCLUDED.file_url,extra=EXCLUDED.extra,updated_at=NOW()`;
     }
     res.json({ ok: true, url });
   } catch (error) {
