@@ -150,3 +150,61 @@ async function restoreTrashRecord(module,id){let r=await fetch(`/api/trash/${mod
 async function permanentTrashRecord(module,id){if(!confirm('Are you sure? This action cannot be undone and all files will be permanently removed from Vercel Blob.'))return;let r=await fetch(`/api/trash/${module}/${id}/permanent`,{method:'DELETE'}),out=await r.json();if(!r.ok)return toast(out.message||'Permanent delete failed');applyServerState(out);toast('Record permanently deleted');loadTrash()}
 function wireActiveSearches(){document.querySelectorAll('.directorySearch').forEach(i=>i.oninput=()=>{$('#rentalDirectory').innerHTML=rentalCards(activeRows(db.rentals).filter(x=>x.mode===i.dataset.mode&&JSON.stringify(x).toLowerCase().includes(i.value.toLowerCase())));bind();wireActiveSearches()});document.querySelectorAll('.masterSearch').forEach(i=>i.oninput=()=>{$('.masterRecords').innerHTML=masterCards(i.dataset.kind,activeRows(db[i.dataset.kind+'s']).filter(x=>JSON.stringify(x).toLowerCase().includes(i.value.toLowerCase())));bind();wireActiveSearches()})}
 function render(){let titles={dashboard:['OVERVIEW','Dashboard'],without:['RENTAL AGREEMENT','Without Driver'],with:['RENTAL AGREEMENT','With Driver'],search:['FIND RECORDS','Search Data'],add:['MASTER DATA','Add Data'],expenses:['BUSINESS COSTS','Expenses'],trash:['RECORD SAFETY','Trash'],admin:['SYSTEM CONFIGURATION','Admin Setup']};$('#pageKicker').textContent=titles[current][0];$('#pageTitle').textContent=titles[current][1];[...document.querySelectorAll('.nav-btn')].forEach(x=>x.classList.toggle('active',x.dataset.page===current));let f={dashboard,without:()=>rentalHub('without'),with:withDriver,search,add:addData,expenses,trash,admin}[current];$('#view').innerHTML=f();bind();wireActiveSearches();if(current==='trash')wireTrash()}
+
+function withoutDriverValue(items,index){return items && items[index] ? items[index].value || '' : ''}
+function withoutDriverNic(items,start){return Array.from(items || []).slice(start,start+13).map(x=>x.value||'').join('')}
+function saveWithoutDriverRental(){
+  try{
+    let frame=$('#withoutDriverFrame'),shell=$('.without-driver-shell');
+    if(!frame||!shell)return toast('Without Driver form is not open.');
+    let doc=frame.contentDocument;
+    if(!doc||!doc.querySelector('.field-input'))return toast('Please wait until the form finishes loading.');
+    let copy={};
+    try{copy=JSON.parse(shell.dataset.rental||'{}')}catch{}
+    let field=doc.querySelectorAll('.field-input'),nic=doc.querySelectorAll('.nic-box'),table=doc.querySelectorAll('.table-input');
+    let o={...copy,
+      seqNo:doc.querySelector('.rental-input')?.value||copy.seqNo||String(activeRows(db.rentals).filter(x=>x.mode==='without').length+1),
+      date:doc.querySelector('.meta-date-input')?.value||copy.date||new Date().toISOString().slice(0,10),
+      customerName:withoutDriverValue(field,0),
+      fatherName:withoutDriverValue(field,1),
+      identityCard:withoutDriverNic(nic,0),
+      phone:withoutDriverValue(field,2),
+      address:withoutDriverValue(field,3),
+      guarantorName:withoutDriverValue(field,4),
+      guarantorFatherName:withoutDriverValue(field,5),
+      guarantorNic:withoutDriverNic(nic,13),
+      guarantorPhone:withoutDriverValue(field,6),
+      guarantorAddress:withoutDriverValue(field,7),
+      carMake:withoutDriverValue(table,0),
+      model:withoutDriverValue(table,1),
+      colour:withoutDriverValue(table,2),
+      carNo:withoutDriverValue(table,3),
+      rentingStation:withoutDriverValue(table,4),
+      chassisNo:withoutDriverValue(table,5),
+      engineNumber:withoutDriverValue(table,6),
+      kilometerOut:withoutDriverValue(table,7),
+      kilometerIn:withoutDriverValue(table,8),
+      pickupDate:withoutDriverValue(table,9),
+      dropupDate:withoutDriverValue(table,10),
+      perDayRent:withoutDriverValue(table,11),
+      totalDays:withoutDriverValue(table,12),
+      rent:withoutDriverValue(table,13),
+      advance:withoutDriverValue(table,14),
+      balance:withoutDriverValue(table,15),
+      mode:'without',
+      is_deleted:false
+    };
+    o.profit=(+o.rent||0)-(+o.fuelExpense||0)-(+o.toll||0)-(+o.driverCommission||0);
+    if(!o.id)o.id=Date.now();
+    let list=db.rentals??=[],index=list.findIndex(x=>String(x.id)===String(o.id));
+    if(index>-1)list[index]=o;else list.push(o);
+    db.rentals=list;
+    save();
+    current='without';
+    toast('Saved successfully');
+    render();
+  }catch(error){
+    console.error(error);
+    toast('Save failed. Please check the form and try again.');
+  }
+}
