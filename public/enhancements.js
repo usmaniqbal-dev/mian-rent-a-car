@@ -273,3 +273,45 @@ document.addEventListener('click',event=>{
   if(event.target.closest('.withoutDriverPdfBtn')){event.preventDefault();exportWithoutDriverPdf()}
 });
 document.addEventListener('load',event=>{if(event.target?.id==='withoutDriverFrame')prepareWithoutDriverFrame()},true);
+
+function blobFromCanvas(canvas,type='image/jpeg',quality=.9){
+  return new Promise(resolve=>canvas.toBlob(resolve,type,quality));
+}
+function cropImageBeforeUpload(file){
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.type?.startsWith('image/'))return resolve(file);
+    let url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      let modal=document.createElement('div');
+      modal.className='crop-modal';
+      modal.innerHTML=`<div class="crop-card"><div class="crop-head"><h3>Crop image</h3><button type="button" class="crop-close" aria-label="Close">x</button></div><div class="crop-stage"><canvas class="crop-canvas" width="320" height="320"></canvas><div class="crop-circle"></div></div><label class="crop-zoom">Zoom<input class="crop-range" type="range" min="1" max="4" step="0.01" value="1"></label><div class="crop-actions"><button type="button" class="secondary crop-cancel">Cancel</button><button type="button" class="primary crop-apply">Use image</button></div></div>`;
+      document.body.appendChild(modal);
+      let canvas=modal.querySelector('.crop-canvas'),ctx=canvas.getContext('2d'),range=modal.querySelector('.crop-range');
+      let size=320,minScale=Math.max(size/img.width,size/img.height),scale=minScale,x=(size-img.width*scale)/2,y=(size-img.height*scale)/2,drag=false,lastX=0,lastY=0;
+      range.value='1';
+      function clamp(){let w=img.width*scale,h=img.height*scale;if(w<=size)x=(size-w)/2;else x=Math.min(0,Math.max(size-w,x));if(h<=size)y=(size-h)/2;else y=Math.min(0,Math.max(size-h,y))}
+      function draw(){clamp();ctx.clearRect(0,0,size,size);ctx.fillStyle='#f5f7fb';ctx.fillRect(0,0,size,size);ctx.drawImage(img,x,y,img.width*scale,img.height*scale)}
+      range.oninput=()=>{let old=scale,cx=size/2,cy=size/2;scale=minScale*Number(range.value);x=cx-(cx-x)*(scale/old);y=cy-(cy-y)*(scale/old);draw()};
+      canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+      canvas.addEventListener('pointermove',e=>{if(!drag)return;x+=e.clientX-lastX;y+=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;draw()});
+      canvas.addEventListener('pointerup',()=>{drag=false});
+      function cleanup(){URL.revokeObjectURL(url);modal.remove()}
+      modal.querySelector('.crop-close').onclick=()=>{cleanup();reject(new Error('Image crop cancelled'))};
+      modal.querySelector('.crop-cancel').onclick=()=>{cleanup();reject(new Error('Image crop cancelled'))};
+      modal.querySelector('.crop-apply').onclick=async()=>{let out=document.createElement('canvas'),outSize=1000,f=outSize/size;out.width=outSize;out.height=outSize;let outCtx=out.getContext('2d');outCtx.fillStyle='#fff';outCtx.fillRect(0,0,outSize,outSize);outCtx.drawImage(img,x*f,y*f,img.width*scale*f,img.height*scale*f);let blob=await blobFromCanvas(out);cleanup();resolve(new File([blob],(file.name||'image').replace(/\.[^.]+$/,'')+'.jpg',{type:'image/jpeg'}))};
+      draw();
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Image preview failed'))};
+    img.src=url;
+  });
+}
+dataUrl=async function(file){
+  if(!file||!file.size)return '';
+  if(!file.type.startsWith('image/'))throw new Error('Only image files are allowed');
+  if(file.size>8*1024*1024)throw new Error('Image must be 8 MB or smaller');
+  let cropped=await cropImageBeforeUpload(file),body=new FormData();
+  body.append('images',cropped,cropped.name||'image.jpg');
+  let r=await fetch('/api/files/images',{method:'POST',body}),out=await r.json();
+  if(!r.ok)throw new Error(out.message||'Image upload failed');
+  return out.url;
+}
