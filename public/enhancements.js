@@ -265,3 +265,11 @@ async function exportWithoutDriverPdf(){
     let frame=$('#withoutDriverFrame');if(frame?.contentWindow){frame.contentWindow.focus();frame.contentWindow.print()}
   }catch(error){toast(error.message||'PDF export failed')}
 }
+function withoutDriverForm(copy){
+  return `<section class="without-driver-shell" data-rental='${JSON.stringify(copy||{}).replace(/'/g,'&#39;')}'><div class="form-heading"><div><h3>Without Driver agreement</h3><p>Fill the original rental agreement below. Export PDF opens this exact filled form for saving as PDF.</p></div>${copy?.id?'<span class="badge">Saved record</span>':''}</div><iframe id="withoutDriverFrame" class="without-driver-frame" src="4th%20form%20template.html" title="Without Driver Rental Agreement"></iframe><div class="form-footer"><button type="button" class="secondary withoutDriverPdfBtn">Export PDF</button><button type="button" class="primary withoutDriverSaveBtn">Save rental record</button></div></section>`
+}
+document.addEventListener('click',event=>{
+  if(event.target.closest('.withoutDriverSaveBtn')){event.preventDefault();saveWithoutDriverRental()}
+  if(event.target.closest('.withoutDriverPdfBtn')){event.preventDefault();exportWithoutDriverPdf()}
+});
+document.addEventListener('load',event=>{if(event.target?.id==='withoutDriverFrame')prepareWithoutDriverFrame()},true);
