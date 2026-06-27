@@ -4,11 +4,6 @@
   "cleanUrls": true,
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "public/**",
-        "server.js",
-        "database.sql"
-      ],
       "memory": 1024,
       "maxDuration": 30
     }
